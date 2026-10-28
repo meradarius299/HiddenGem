@@ -1,0 +1,5 @@
+spring:
+  ai:
+    google:
+      genai:
+        api-key: ${AQ.Ab8RNGL1WVTrwtponPcI3q3NJrun2o0AdrWcNFQWSgZeT5vg}

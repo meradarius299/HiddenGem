@@ -1,0 +1,82 @@
+# ==========================================
+# Build & Compiled Files (Maven / Java)
+# ==========================================
+target/
+target/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mvn/wrapper/maven-wrapper.jar
+
+# Exceptions
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ==========================================
+# IDEs & Editors
+# ==========================================
+# IntelliJ IDEA
+my_town_hidden_gems/.idea/
+*.iws
+*.iml
+*.ipr
+/shelf/
+/workspace.xml
+/httpRequests/
+/dataSources/
+/dataSources.local.xml
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code
+.vscode/
+
+# BlueJ & Mobile Tools
+*.ctxt
+.mtj.tmp/
+
+# ==========================================
+# Logs, Environment & Local Configs
+# ==========================================
+*.log
+application-local.properties
+hs_err_pid*
+replay_pid*
+
+# ==========================================
+# OS & Misc
+# ==========================================
+.DS_Store
+Thumbs.db
+HELP.md
+
+.env
+.env.local
+.env.*
+application-local.properties
+**/application-local.properties
+target/
+.idea/
+*.iml
