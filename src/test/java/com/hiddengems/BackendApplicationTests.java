@@ -1,10 +1,10 @@
-package com.example.my_town_hidden_gems;
+package com.hiddengems;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MyTownHiddenGemsApplicationTests {
+class BackendApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -38,9 +38,22 @@ const distTo = (g) => (player ? distanceM(player.lat, player.lon, g.lat, g.lon) 
 const fmt = (m) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
 
 // ---------- map ----------
-const map = L.map("map");
+const WORLD = L.latLngBounds([[-85, -180], [85, 180]]);
+
+const map = L.map("map", {
+    maxBounds: WORLD,          // can't scroll past the edges of the world
+    maxBoundsViscosity: 1.0    // hard stop at the edge, no rubber-banding
+});
+
+// Don't let the user zoom out further than the point where the map fills the screen
+const fitWorld = () => map.setMinZoom(map.getBoundsZoom(WORLD, true));
+fitWorld();
+map.on("resize", fitWorld);
+
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
+    noWrap: true,               // don't repeat the world horizontally
+    bounds: WORLD,
     attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 

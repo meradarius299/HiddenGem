@@ -1,4 +1,5 @@
 :root {
+    font-size: 112%;
     --page: #dce8e4;
     --panel: #f3f7f5;
     --ink: #1e2b33;
@@ -7,7 +8,7 @@
     --brass: #a9741a;
     --moss: #2e6b57;
     --stone: #7f909b;
-    font-family: "Figtree", system-ui, sans-serif;
+    font-family: "Alegreya Sans", system-ui, sans-serif;
     color: var(--ink);
 }
 
@@ -19,7 +20,7 @@ header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 0.6rem 1rem; background: var(--ink); color: var(--panel);
 }
-h1, h2, h3 { font-family: "Literata", Georgia, serif; font-weight: 600; margin: 0; }
+h1, h2, h3 { font-family: "Alegreya", Georgia, serif; font-weight: 600; margin: 0; }
 h1 { font-size: 1.25rem; }
 #keys { font-weight: 600; color: #e6c27a; }
 
@@ -34,7 +35,7 @@ aside { background: var(--panel); border-left: 1px solid var(--line); overflow-y
     font: inherit; color: inherit; cursor: pointer; display: grid; gap: 0.15rem;
 }
 #list button:hover { background: #e6efeb; }
-#list .t { font-family: "Literata", Georgia, serif; }
+#list .t { font-family: "Alegreya", Georgia, serif; }
 #list .s { font-size: 0.85rem; color: var(--muted); }
 #list li.done .t { color: var(--moss); font-weight: 600; }
 
@@ -63,7 +64,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--brass); out
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 #nearby[hidden] { display: none; }
-#nearby p { margin: 0 0 0.7rem; font-family: "Literata", Georgia, serif; }
+#nearby p { margin: 0 0 0.7rem; font-family: "Alegreya", Georgia, serif; }
 #nearby button { margin-right: 0.4rem; }
 
 dialog {
@@ -73,7 +74,7 @@ dialog {
 }
 dialog::backdrop { background: rgba(30, 43, 51, 0.6); }
 dialog h2 { margin-bottom: 0.8rem; }
-dialog p { font-family: "Literata", Georgia, serif; line-height: 1.65; max-width: 65ch; }
+dialog p { font-family: "Alegreya", Georgia, serif; line-height: 1.65; max-width: 65ch; }
 .quiz { margin: 1.2rem 0; padding-top: 1rem; border-top: 1px solid var(--line); display: grid; gap: 0.5rem; }
 .quiz h3 { font-size: 1.05rem; }
 button.option { text-align: left; }
