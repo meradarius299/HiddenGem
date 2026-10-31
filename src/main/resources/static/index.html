@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hidden Gems</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Hidden Gems</h1>
+    <div id="keys" aria-live="polite"></div>
+</header>
+
+<main>
+    <div id="map"></div>
+    <aside>
+        <ul id="list"></ul>
+        <div class="dev">
+            <label><input type="checkbox" id="fake"> Fake my location (click the map)</label>
+            <button type="button" id="reset">Reset progress</button>
+            <p id="status"></p>
+        </div>
+    </aside>
+</main>
+
+<div id="nearby" role="alert" hidden>
+    <p id="nearby-text"></p>
+    <button type="button" id="nearby-open">Unlock story</button>
+    <button type="button" id="nearby-close" class="plain">Not now</button>
+</div>
+
+<dialog id="story"></dialog>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="gems.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
