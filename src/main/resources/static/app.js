@@ -1,7 +1,10 @@
 "use strict";
 
+// Set by boot.js after login (from the backend, or the demo data in gems.js).
+const GEMS = window.GEMS_DATA;
+
 const UNLOCK_RADIUS_M = 75;
-const STORAGE_KEY = "hiddenGems.unlocked";
+const STORAGE_KEY = "hiddenGems.unlocked." + (window.CURRENT_USER || "guest");
 const $ = (id) => document.getElementById(id);
 
 function el(tag, text = "", cls = "") {
@@ -154,6 +157,13 @@ function openStory(g) {
 }
 
 function renderQuiz(g) {
+    if (!g.quiz) { // gems from the backend have no quiz yet: collecting the key is one click
+        const collect = el("button", "Collect this key", "option");
+        collect.type = "button";
+        collect.addEventListener("click", () => collectKey(g));
+        dlg.append(collect, closeBtn());
+        return;
+    }
     const wrap = el("div", "", "quiz");
     const feedback = el("p", "", "feedback");
     wrap.append(el("h3", g.quiz.question));
