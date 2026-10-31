@@ -1,5 +1,10 @@
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/your_database_name
+    username: hguser
+    password: hguser
+    driver-class-name: org.postgresql.Driver
   ai:
     google:
       genai:
-        api-key: ${AQ.Ab8RNGL1WVTrwtponPcI3q3NJrun2o0AdrWcNFQWSgZeT5vg}
+        api-key: ${AQ.Ab8RNGL1WV  TrwtponPcI3q3NJrun2o0AdrWcNFQWSgZeT5vg}

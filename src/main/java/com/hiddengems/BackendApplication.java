@@ -1,14 +1,12 @@
-package com.example.my_town_hidden_gems;
+package com.hiddengems;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MyTownHiddenGemsApplication {
+public class BackendApplication {
 
     public static void main(String[] args) {
-
-        SpringApplication.run(MyTownHiddenGemsApplication.class, args);
+        SpringApplication.run(BackendApplication.class, args);
     }
-
 }
