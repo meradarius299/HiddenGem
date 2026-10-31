@@ -217,8 +217,89 @@ if ("geolocation" in navigator) {
 $("fake").addEventListener("change", () =>
     setStatus($("fake").checked ? "Fake location on: click the map to move there." : "Using your real location."));
 
+// ---------- add a new gem (saved in the backend database) ----------
+const CATEGORIES = ["Museum", "Park", "Street art", "Viewpoint", "Cafe", "Other"];
+const addBtn = $("add-gem");
+let picking = false;
+
+function setPicking(on) {
+    picking = on;
+    map.getContainer().style.cursor = on ? "crosshair" : "";
+    addBtn.textContent = on ? "Click the map to place it (cancel)" : "+ Add a gem";
+}
+
+addBtn.addEventListener("click", () => setPicking(!picking));
+
+function openGemForm(lat, lon) {
+    if (dlg.open) dlg.close();
+    dlg.replaceChildren(el("h2", "Add a hidden gem"));
+
+    const field = (label, control) => {
+        const l = el("label");
+        l.append(el("span", label), control);
+        return l;
+    };
+    const name = el("input");
+    name.maxLength = 120;
+    const category = el("select");
+    CATEGORIES.forEach((c) => category.append(new Option(c, c)));
+    const story = el("textarea");
+    story.rows = 6;
+    story.maxLength = 5000;
+    const msg = el("p", "", "feedback");
+    const save = el("button", "Save gem");
+    save.type = "submit";
+    const cancel = el("button", "Cancel", "plain");
+    cancel.type = "button";
+    cancel.addEventListener("click", () => dlg.close());
+    const actions = el("div", "", "actions");
+    actions.append(save, cancel);
+
+    const form = el("form", "", "gem-form");
+    form.noValidate = true;
+    form.append(
+        field("Name", name),
+        field("Category", category),
+        field("Story (what makes this place special?)", story),
+        el("p", `Location: ${lat.toFixed(5)}, ${lon.toFixed(5)}`),
+        msg,
+        actions
+    );
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!name.value.trim()) { msg.textContent = "Give the gem a name."; return; }
+        save.disabled = true;
+        msg.textContent = "";
+        try {
+            await API.createGem({
+                name: name.value.trim(),
+                description: story.value.trim(),
+                latitude: lat,
+                longitude: lon,
+                category: category.value
+            });
+            location.reload(); // reload so the new gem is fetched with all the others
+        } catch (err) {
+            msg.textContent =
+                err.status === 401 || err.status === 403 ? "Your session expired. Log out and log in again."
+                    : err.status === 400 ? "Check the fields: the name is required."
+                        : "Could not save. Is the backend running?";
+            save.disabled = false;
+        }
+    });
+
+    dlg.append(form);
+    dlg.showModal();
+}
+
 map.on("click", (e) => {
-    if ($("fake").checked) setPlayer(e.latlng.lat, e.latlng.lng);
+    if (picking) {
+        setPicking(false);
+        openGemForm(e.latlng.lat, e.latlng.lng);
+    } else if ($("fake").checked) {
+        setPlayer(e.latlng.lat, e.latlng.lng);
+    }
 });
 
 $("reset").addEventListener("click", () => {

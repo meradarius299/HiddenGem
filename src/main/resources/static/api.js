@@ -36,6 +36,7 @@ const API = (() => {
             const r = await request("/api/auth/register", { method: "POST", body: { username, email, password } });
             return r && r.token ? save(r) : API.login(username, password);
         },
-        getGems: () => request("/api/gems")
+        getGems: () => request("/api/gems"),
+        createGem: (gem) => request("/api/gems", { method: "POST", body: gem })
     };
 })();
