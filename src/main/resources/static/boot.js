@@ -18,6 +18,7 @@
         story: g.description || "Nobody has written the story of this place yet.",
         quiz: null,
         verified: g.verified,
+        owner: g.owner
     });
 
     // Sample gems from gems.js, used when the database has no gems yet.
@@ -27,10 +28,7 @@
     }
 
     async function start() {
-        if (!API.isLoggedIn()) {
-            location.replace("login.html");
-            return;
-        }
+        if (!API.isLoggedIn()) { location.replace("login.html"); return; }
         let gems;
         try {
             gems = (await API.getGems()).map(toGame);
@@ -56,6 +54,7 @@
         out.type = "button";
         out.className = "plain";
         out.textContent = "Log out";
+        out.addEventListener("click", () => { API.logout(); location.reload(); });
         account.append(who, out);
         document.querySelector("header").append(account);
 
