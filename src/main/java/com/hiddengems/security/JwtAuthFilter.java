@@ -43,8 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
-                // token invalid / expirat / utilizator sters: cererea ramane neautentificata (-> 401)
-            }
+             }
         }
         chain.doFilter(request, response);
     }

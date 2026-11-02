@@ -23,7 +23,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Short id; // SMALLSERIAL in baza de date
+    private Short id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 30)

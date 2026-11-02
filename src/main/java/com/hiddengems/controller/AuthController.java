@@ -32,7 +32,6 @@ public class AuthController {
         return authService.login(request);
     }
 
-    /** Login cu Google: aplicatia mobila trimite idToken-ul primit de la Google Sign-In. */
     @PostMapping("/google")
     public AuthResponse google(@Valid @RequestBody GoogleLoginRequest request) {
         return authService.loginWithGoogle(request);

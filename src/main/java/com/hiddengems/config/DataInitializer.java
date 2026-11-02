@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 
-/** La pornire creeaza rolurile si contul de admin (din application.properties) daca nu exista. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -48,7 +47,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPasswordHash(passwordEncoder.encode(adminPassword));
             admin.setRoles(new HashSet<>(Set.of(userRole, adminRole)));
             userRepository.save(admin);
-            log.info("Cont admin creat: {}", adminUsername);
+            log.info("Admin account created: {}", adminUsername);
         }
     }
 

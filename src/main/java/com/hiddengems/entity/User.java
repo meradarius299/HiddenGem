@@ -37,7 +37,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    /** NULL pentru conturile create prin Google. */
     @Column(name = "password_hash")
     private String passwordHash;
 

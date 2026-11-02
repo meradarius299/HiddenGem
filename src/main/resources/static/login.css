@@ -1,0 +1,154 @@
+/* Login page. Same layout as the property-management login, in the Hidden Gems palette. */
+:root {
+    font-size: 112%;
+    --page: #dce8e4;
+    --ink: #1e2b33;
+    --ink-soft: #2f4250;
+    --muted: #5b6d77;
+    --line: #bfd0ca;
+    --brass: #a9741a;
+    --brass-deep: #84590f;
+    --danger: #9b2c2c;
+    --serif: "Alegreya", Georgia, "Iowan Old Style", serif;
+    --sans: "Alegreya Sans", system-ui, sans-serif;
+    font-family: var(--sans);
+    color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--page); }
+
+.auth-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 45%, var(--page) 45%, var(--page) 100%);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 40px 36px;
+    box-shadow: 0 24px 60px rgba(30, 43, 51, 0.28);
+}
+
+.wordmark {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+}
+
+.wordmark span {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: var(--brass);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.auth-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.auth-form input {
+    font: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    color: var(--ink);
+    border: 1px solid #c9d6d1;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.auth-form input:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 1px;
+}
+
+.btn-primary {
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 3px;
+    background: var(--ink);
+    color: #fff;
+    cursor: pointer;
+}
+
+.btn-primary:hover { background: var(--ink-soft); }
+.btn-primary:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+.btn-primary:disabled { opacity: 0.6; cursor: default; }
+
+.form-message {
+    min-height: 20px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--danger);
+}
+
+.form-message.is-info { color: var(--muted); }
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 14px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+}
+
+.google-btn-slot {
+    display: flex;
+    justify-content: center;
+}
+
+.auth-switch {
+    margin: 22px 0 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.auth-switch a {
+    color: var(--brass-deep);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-switch a:hover { text-decoration: underline; }
+
+@media (max-width: 440px) {
+    .auth-card { padding: 32px 24px; }
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log in · Hidden Gems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+<section class="auth-screen">
+    <div class="auth-card">
+        <div class="wordmark">Hidden Gems<span>DISCOVER · UNLOCK · COLLECT</span></div>
+
+        <form id="auth-form" class="auth-form" novalidate>
+            <label>
+                Username
+                <input name="username" autocomplete="username" required>
+            </label>
+            <label id="email-row" hidden>
+                Email
+                <input name="email" type="email" autocomplete="email">
+            </label>
+            <label>
+                Password
+                <input name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit" id="submit" class="btn-primary">Log In</button>
+            <p id="message" class="form-message" role="alert"></p>
+        </form>
+
+        <div id="google-block" hidden>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="google-slot" class="google-btn-slot"></div>
+        </div>
+
+        <p class="auth-switch">
+            <span id="switch-text">Don't have an account?</span>
+            <a href="#" id="switch">Create one here</a>
+        </p>
+    </div>
+</section>
+
+<script src="api.js"></script>
+<script src="login.js"></script>
+</body>
+</html>

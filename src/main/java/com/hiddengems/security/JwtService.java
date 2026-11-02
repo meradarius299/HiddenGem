@@ -43,8 +43,6 @@ public class JwtService {
     public String extractUsername(String token) {
         return parse(token).getSubject();
     }
-
-    /** Tokenul este valid daca semnatura e corecta, nu a expirat si apartine utilizatorului. */
     public boolean isValid(String token, UserDetails user) {
         try {
             return parse(token).getSubject().equals(user.getUsername());

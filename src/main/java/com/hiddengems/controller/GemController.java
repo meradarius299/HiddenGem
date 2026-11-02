@@ -28,7 +28,6 @@ public class GemController {
 
     private final GemService gemService;
 
-    // Orice utilizator autentificat poate vedea locurile
     @GetMapping
     public List<GemResponse> getAll() {
         return gemService.findAll();
@@ -52,7 +51,6 @@ public class GemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(gemService.create(request, auth.getName()));
     }
 
-    // Doar administratorul poate sterge un loc
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -60,7 +58,6 @@ public class GemController {
         return ResponseEntity.noContent().build();
     }
 
-    // Doar administratorul poate marca un loc ca verificat
     @PatchMapping("/{id}/verify")
     @PreAuthorize("hasRole('ADMIN')")
     public GemResponse verify(@PathVariable Long id, @RequestParam(defaultValue = "true") boolean verified) {

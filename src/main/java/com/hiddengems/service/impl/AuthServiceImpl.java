@@ -49,10 +49,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username-ul este deja folosit");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already used");
         }
         if (userRepository.existsByEmail(request.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email-ul este deja folosit");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already used");
         }
 
         User user = new User();
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
             auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         } catch (AuthenticationException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username sau parola gresite");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username or password incorrect");
         }
         return toResponse((UserDetails) auth.getPrincipal());
     }
@@ -82,10 +82,9 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
         GoogleUser google = googleTokenVerifier.verify(request.idToken());
         if (!google.emailVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Emailul Google nu este verificat");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gmail is not verified");
         }
 
-        // 1) cont deja legat de Google  2) cont existent cu acelasi email (il legam)  3) cont nou
         User user = userRepository.findByGoogleId(google.subject())
                 .or(() -> userRepository.findByEmail(google.email()).map(existing -> {
                     existing.setGoogleId(google.subject());
@@ -94,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseGet(() -> createGoogleUser(google));
 
         if (!user.isEnabled()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Contul este blocat");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account blocked");
         }
         return toResponse(userDetailsService.loadUserByUsername(user.getUsername()));
     }
@@ -128,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
     private Role defaultRole() {
         return roleRepository.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR, "Rolul ROLE_USER lipseste din baza de date"));
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Role ROLE_USER is not exist in data base"));
     }
 
     private AuthResponse toResponse(UserDetails user) {

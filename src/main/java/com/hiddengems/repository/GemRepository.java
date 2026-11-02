@@ -1,11 +1,13 @@
 package com.hiddengems.repository;
 
 import com.hiddengems.entity.Gem;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +18,10 @@ public interface GemRepository extends JpaRepository<Gem, Long> {
 
     @EntityGraph(attributePaths = "owner")
     Optional<Gem> findWithOwnerById(Long id);
+
+    /** Locurile adaugate de utilizatorii din lista (folosit pentru feed-ul prietenilor). */
+    @EntityGraph(attributePaths = "owner")
+    List<Gem> findByOwnerIdIn(Collection<Long> ownerIds, Pageable pageable);
 
     /** Locuri aflate la cel mult radiusKm de punctul (lat, lng) - formula Haversine. */
     @Query(value = """

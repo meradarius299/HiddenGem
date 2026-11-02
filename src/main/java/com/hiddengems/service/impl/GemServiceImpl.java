@@ -7,6 +7,7 @@ import com.hiddengems.entity.User;
 import com.hiddengems.repository.GemRepository;
 import com.hiddengems.repository.UserRepository;
 import com.hiddengems.service.GemService;
+import com.hiddengems.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class GemServiceImpl implements GemService {
 
     private final GemRepository gemRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -53,7 +55,12 @@ public class GemServiceImpl implements GemService {
         gem.setLatitude(request.latitude());
         gem.setLongitude(request.longitude());
         gem.setCategory(request.category());
-        return GemResponse.from(gemRepository.save(gem));
+        Gem saved = gemRepository.save(gem);
+
+        // prietenii primesc "Uite ce a descoperit ..."
+        notificationService.notifyFriendsNewGem(owner, saved);
+
+        return GemResponse.from(saved);
     }
 
     @Override

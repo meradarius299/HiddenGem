@@ -1,8 +1,6 @@
 "use strict";
 
-// Set by boot.js after login (from the backend, or the demo data in gems.js).
 const GEMS = window.GEMS_DATA;
-
 const UNLOCK_RADIUS_M = 75;
 const STORAGE_KEY = "hiddenGems.unlocked." + (window.CURRENT_USER || "guest");
 const $ = (id) => document.getElementById(id);
@@ -14,7 +12,6 @@ function el(tag, text = "", cls = "") {
     return e;
 }
 
-// ---------- progress (browser storage for now; swap for the backend later) ----------
 const unlocked = (() => {
     try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []); }
     catch { return new Set(); }
@@ -22,10 +19,9 @@ const unlocked = (() => {
 
 function saveProgress() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...unlocked])); }
-    catch { /* storage blocked: progress lasts until the page closes */ }
+    catch {}
 }
 
-// ---------- distance (Haversine formula, result in meters) ----------
 function distanceM(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const rad = (d) => (d * Math.PI) / 180;
@@ -36,26 +32,24 @@ function distanceM(lat1, lon1, lat2, lon2) {
     return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-let player = null; // { lat, lon } once we know where the player is
+let player = null;
 const distTo = (g) => (player ? distanceM(player.lat, player.lon, g.lat, g.lon) : null);
 const fmt = (m) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
 
-// ---------- map ----------
 const WORLD = L.latLngBounds([[-85, -180], [85, 180]]);
 
 const map = L.map("map", {
-    maxBounds: WORLD,          // can't scroll past the edges of the world
-    maxBoundsViscosity: 1.0    // hard stop at the edge, no rubber-banding
+    maxBounds: WORLD,
+    maxBoundsViscosity: 1.0
 });
 
-// Don't let the user zoom out further than the point where the map fills the screen
 const fitWorld = () => map.setMinZoom(map.getBoundsZoom(WORLD, true));
 fitWorld();
 map.on("resize", fitWorld);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    noWrap: true,               // don't repeat the world horizontally
+    noWrap: true,
     bounds: WORLD,
     attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
@@ -91,7 +85,6 @@ function onGemClick(g) {
     L.popup().setLatLng([g.lat, g.lon]).setContent(box).openOn(map);
 }
 
-// ---------- UI refresh ----------
 function updateUI() {
     markers.forEach((m, id) => m.setIcon(pinIcon(unlocked.has(id))));
     $("keys").textContent = `${unlocked.size} / ${GEMS.length} keys`;
@@ -118,8 +111,7 @@ function renderList() {
     });
 }
 
-// ---------- "you're near a gem" popup ----------
-const dismissed = new Set(); // gems whose prompt the player closed
+const dismissed = new Set();
 
 function checkNearby() {
     const box = $("nearby");
@@ -137,7 +129,6 @@ function checkNearby() {
     box.hidden = false;
 }
 
-// ---------- story + quiz dialog ----------
 const dlg = $("story");
 
 function closeBtn() {
@@ -157,7 +148,7 @@ function openStory(g) {
 }
 
 function renderQuiz(g) {
-    if (!g.quiz) { // gems from the backend have no quiz yet: collecting the key is one click
+    if (!g.quiz) {
         const collect = el("button", "Collect this key", "option");
         collect.type = "button";
         collect.addEventListener("click", () => collectKey(g));
@@ -194,7 +185,6 @@ function collectKey(g) {
     updateUI();
 }
 
-// ---------- player location ----------
 function setStatus(msg) { $("status").textContent = msg; }
 
 function setPlayer(lat, lon) {
@@ -213,11 +203,9 @@ if ("geolocation" in navigator) {
     setStatus("This browser has no geolocation. Use the fake location option to test.");
 }
 
-// ---------- dev tools ----------
 $("fake").addEventListener("change", () =>
     setStatus($("fake").checked ? "Fake location on: click the map to move there." : "Using your real location."));
 
-// ---------- add a new gem (saved in the backend database) ----------
 const CATEGORIES = ["Museum", "Park", "Street art", "Viewpoint", "Cafe", "Other"];
 const addBtn = $("add-gem");
 let picking = false;
@@ -279,7 +267,7 @@ function openGemForm(lat, lon) {
                 longitude: lon,
                 category: category.value
             });
-            location.reload(); // reload so the new gem is fetched with all the others
+            location.reload();
         } catch (err) {
             msg.textContent =
                 err.status === 401 || err.status === 403 ? "Your session expired. Log out and log in again."

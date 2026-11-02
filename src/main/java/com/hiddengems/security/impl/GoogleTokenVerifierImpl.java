@@ -20,10 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Valideaza tokenul Google: semnatura (cheile publice Google), expirarea, emitentul si audienta
- * (trebuie sa fie unul dintre client ID-urile din app.google.client-ids).
- */
+
 @Component
 public class GoogleTokenVerifierImpl implements GoogleTokenVerifier {
 
@@ -64,13 +61,13 @@ public class GoogleTokenVerifierImpl implements GoogleTokenVerifier {
     public GoogleUser verify(String idToken) {
         if (allowedAudiences.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Login cu Google nu este configurat (app.google.client-ids)");
+                    "Login with Google is not configure (app.google.client-ids)");
         }
         try {
             Jwt jwt = decoder.decode(idToken);
             String email = jwt.getClaimAsString("email");
             if (email == null || email.isBlank()) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Google fara email");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Google without email");
             }
             return new GoogleUser(
                     jwt.getSubject(),
@@ -78,7 +75,7 @@ public class GoogleTokenVerifierImpl implements GoogleTokenVerifier {
                     jwt.getClaimAsString("name"),
                     Boolean.TRUE.equals(jwt.getClaimAsBoolean("email_verified")));
         } catch (JwtException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Google invalid");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token Google");
         }
     }
 }
