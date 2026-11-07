@@ -179,7 +179,8 @@ async function collectKey(g, feedback) {
         if (!player) { feedback.textContent = "Waiting for your location..."; return; }
         try {
             // the server checks that you are really near the gem before it saves the key
-            await API.collectGem(g.id, player.lat, player.lon);
+            const result = await API.collectGem(g.id, player.lat, player.lon);
+            window.dispatchEvent(new CustomEvent("key-collected", { detail: result || {} })); // rewards.js listens
         } catch (err) {
             feedback.textContent =
                 err.status === 400 ? "The server says you are too far from this gem. Get closer and try again."
@@ -310,6 +311,7 @@ $("reset").addEventListener("click", async () => {
     if (!window.IS_DEMO) {
         try { await API.resetCollected(); }
         catch { setStatus("Could not reset your keys on the server."); return; }
+        window.dispatchEvent(new Event("progress-reset"));
     }
     unlocked.clear();
     dismissed.clear();

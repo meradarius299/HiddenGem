@@ -3,6 +3,7 @@ package com.hiddengems.service;
 import com.hiddengems.dto.NotificationResponse;
 import com.hiddengems.entity.Gem;
 import com.hiddengems.entity.User;
+import com.hiddengems.entity.Badge;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ public interface NotificationService {
     void notifyFriendsNewGem(User actor, Gem gem);
 
     void notifyFriendRequest(User from, User to);
+
+    void notifyBadgeEarned(User user, Badge badge);
 
     void notifyFriendAccepted(User accepter, User requester);
 

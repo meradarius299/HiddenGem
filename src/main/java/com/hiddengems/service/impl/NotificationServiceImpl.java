@@ -10,6 +10,7 @@ import com.hiddengems.repository.FriendshipRepository;
 import com.hiddengems.repository.NotificationRepository;
 import com.hiddengems.repository.UserRepository;
 import com.hiddengems.service.NotificationService;
+import com.hiddengems.entity.Badge;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.List;
 
@@ -53,6 +55,14 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyFriendRequest(User from, User to) {
         notificationRepository.save(build(to, from, NotificationType.FRIEND_REQUEST, null,
                 "%s sent you a friend request".formatted(from.getUsername())));
+    }
+
+    @Override
+    @Transactional
+    public void notifyBadgeEarned(User user, Badge badge) {
+        // The player is both recipient and actor: they triggered it by collecting a key.
+        notificationRepository.save(build(user, user, NotificationType.BADGE_EARNED, null,
+                "You earned the \"%s\" badge: %s.".formatted(badge.getTitle(), badge.getDescription().toLowerCase())));
     }
 
     @Override

@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.hiddengems.entity.Badge;
+import com.hiddengems.service.BadgeService;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class CollectionServiceImpl implements CollectionService {
     private final CollectedGemRepository collectedGemRepository;
     private final GemRepository gemRepository;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
 
     @Override
     public List<Long> collectedGemIds(String username) {
@@ -58,13 +61,18 @@ public class CollectionServiceImpl implements CollectionService {
                 already = true; // a parallel request saved it first
             }
         }
-        return new CollectResponse(gemId, already, collectedGemRepository.countByUserId(user.getId()));
+        long total = collectedGemRepository.countByUserId(user.getId());
+        List<String> newBadges = already
+                ? List.of()
+                : badgeService.awardEarned(user, total).stream().map(Badge::getTitle).toList();
+        return new CollectResponse(gemId, already, total, newBadges);
     }
 
     @Override
     @Transactional
     public void reset(String username) {
         collectedGemRepository.deleteByUserId(getUser(username).getId());
+        badgeService.reset(username);
     }
 
     private User getUser(String username) {
