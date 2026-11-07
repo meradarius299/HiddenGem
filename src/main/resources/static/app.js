@@ -13,6 +13,8 @@ function el(tag, text = "", cls = "") {
 }
 
 const unlocked = (() => {
+    // The server is the source of truth. If we couldn't reach it, use the copy saved in this browser.
+    if (Array.isArray(window.COLLECTED_IDS)) return new Set(window.COLLECTED_IDS);
     try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []); }
     catch { return new Set(); }
 })();
@@ -150,9 +152,10 @@ function openStory(g) {
 function renderQuiz(g) {
     if (!g.quiz) {
         const collect = el("button", "Collect this key", "option");
+        const note = el("p", "", "feedback");
         collect.type = "button";
-        collect.addEventListener("click", () => collectKey(g));
-        dlg.append(collect, closeBtn());
+        collect.addEventListener("click", () => collectKey(g, note));
+        dlg.append(collect, note, closeBtn());
         return;
     }
     const wrap = el("div", "", "quiz");
@@ -162,7 +165,7 @@ function renderQuiz(g) {
         const b = el("button", opt, "option");
         b.type = "button";
         b.addEventListener("click", () => {
-            if (i === g.quiz.answer) collectKey(g);
+            if (i === g.quiz.answer) collectKey(g, feedback);
             else feedback.textContent = "Not quite. Read the story again and try another answer.";
         });
         wrap.append(b);
@@ -171,7 +174,20 @@ function renderQuiz(g) {
     dlg.append(wrap, closeBtn());
 }
 
-function collectKey(g) {
+async function collectKey(g, feedback) {
+    if (!window.IS_DEMO) {
+        if (!player) { feedback.textContent = "Waiting for your location..."; return; }
+        try {
+            // the server checks that you are really near the gem before it saves the key
+            await API.collectGem(g.id, player.lat, player.lon);
+        } catch (err) {
+            feedback.textContent =
+                err.status === 400 ? "The server says you are too far from this gem. Get closer and try again."
+                    : err.status === 401 || err.status === 403 ? "Your session expired. Log out and log in again."
+                        : "Could not save your key. Is the backend running?";
+            return;
+        }
+    }
     unlocked.add(g.id);
     saveProgress();
     dlg.replaceChildren(
@@ -290,7 +306,11 @@ map.on("click", (e) => {
     }
 });
 
-$("reset").addEventListener("click", () => {
+$("reset").addEventListener("click", async () => {
+    if (!window.IS_DEMO) {
+        try { await API.resetCollected(); }
+        catch { setStatus("Could not reset your keys on the server."); return; }
+    }
     unlocked.clear();
     dismissed.clear();
     saveProgress();

@@ -1,4 +1,4 @@
-// SAMPLE DATA: replace coordinates and texts with real places from your town.
+// SAMPLE DATA
 // Later this array will come from the backend (GraphQL) instead of this file.
 // quiz.answer is the index (starting at 0) of the correct option.
 const GEMS = [

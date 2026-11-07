@@ -1,7 +1,4 @@
 "use strict";
-
-// Runs before app.js: makes sure the user is logged in, loads the gems from the
-// backend, then starts the game (app.js reads window.GEMS_DATA).
 (function () {
     const css = document.createElement("style");
     css.textContent = `#account { display: flex; gap: .6rem; align-items: center; font-size: .9rem; }`;
@@ -45,6 +42,11 @@
 
         window.GEMS_DATA = gems;
         window.CURRENT_USER = API.username();
+        window.IS_DEMO = demo;
+        window.COLLECTED_IDS = null; // null = could not load; app.js falls back to the copy in this browser
+        if (!demo) {
+            try { window.COLLECTED_IDS = await API.getCollected(); } catch { /* keep the browser copy */ }
+        }
 
         const account = document.createElement("div");
         account.id = "account";

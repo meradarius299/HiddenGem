@@ -61,6 +61,10 @@ const API = (() => {
         googleLogin: async (idToken) =>
             save(await request("/api/auth/google", {method: "POST", body: {idToken}})),
         getGems: () => request("/api/gems"),
-        createGem: (gem) => request("/api/gems", {method: "POST", body: gem})
+        createGem: (gem) => request("/api/gems", {method: "POST", body: gem}),
+        collectGem: (id, lat, lng) =>
+            request(`/api/gems/${id}/collect`, {method: "POST", body: {latitude: lat, longitude: lng}}),
+        getCollected: () => request("/api/me/collected"),
+        resetCollected: () => request("/api/me/collected", {method: "DELETE"})
     };
 })();
