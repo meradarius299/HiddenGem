@@ -49,7 +49,6 @@ public class FriendServiceImpl implements FriendService {
         } else if (friendship.getStatus() == FriendshipStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Exista deja o cerere in asteptare");
         } else {
-            // REJECTED: refolosim randul (perechea e unica in baza de date) si retrimitem cererea
             friendship.setRequester(me);
             friendship.setAddressee(target);
             friendship.setStatus(FriendshipStatus.PENDING);
@@ -119,8 +118,6 @@ public class FriendServiceImpl implements FriendService {
                 .map(UserSummaryResponse::from)
                 .toList();
     }
-
-    /** Cererea trebuie sa existe, sa fie adresata utilizatorului curent si sa fie inca PENDING. */
     private Friendship getPendingRequestFor(User me, Long requestId) {
         Friendship friendship = friendshipRepository.findById(requestId)
                 .filter(f -> f.getAddressee().getId().equals(me.getId()))

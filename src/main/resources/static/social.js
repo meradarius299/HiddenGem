@@ -7,8 +7,9 @@
         BUMP: "\u{1F44B}",
         BADGE_EARNED: "\u{1F3C5}",
         TASK_COMPLETED: "\u{1F3AF}",
-        REVIEW_ADDED: "⭐",
-        INACTIVITY_REMINDER: "⏰"
+        USER_REQUEST: "\u23F3",
+        REVIEW_ADDED: "\u2705",
+        INACTIVITY_REMINDER: "\u23F0"
     };
 
     const css = document.createElement("style");

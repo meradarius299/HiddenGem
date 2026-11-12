@@ -57,7 +57,6 @@ public class GemServiceImpl implements GemService {
         gem.setCategory(request.category());
         Gem saved = gemRepository.save(gem);
 
-        // prietenii primesc "Uite ce a descoperit ..."
         notificationService.notifyFriendsNewGem(owner, saved);
 
         return GemResponse.from(saved);

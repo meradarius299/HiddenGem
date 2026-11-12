@@ -17,7 +17,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/** Coloana "payload" (JSONB) din tabel nu este mapata aici; momentan nu o folosim. */
+
 @Entity
 @Table(name = "notifications")
 @Getter
@@ -29,12 +29,10 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Cine primeste notificarea. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
-    /** Cine a declansat-o (prietenul care a adaugat locul etc.). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id")
     private User actor;
@@ -50,7 +48,6 @@ public class Notification {
     @Column(nullable = false, length = 300)
     private String message;
 
-    /** Coloana is_read. */
     @Column(name = "is_read", nullable = false)
     private boolean seen = false;
 
