@@ -60,6 +60,8 @@
         account.append(who, out);
         document.querySelector("header").append(account);
 
+        window.GEM_MAP = await HiddenGemGlobe.create(gems);
+
         const s = document.createElement("script");
         s.src = "app.js";
         document.body.append(s);
