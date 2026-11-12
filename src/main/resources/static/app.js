@@ -49,12 +49,9 @@ const fitWorld = () => map.setMinZoom(map.getBoundsZoom(WORLD, true));
 fitWorld();
 map.on("resize", fitWorld);
 
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    noWrap: true,
-    bounds: WORLD,
-    attribution: "&copy; OpenStreetMap contributors"
-}).addTo(map);
+// Basemap loading does not block gem or location interactions.
+HiddenGemMap.addBasemap(map, WORLD);
+L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
 
 if (GEMS.length) map.fitBounds(GEMS.map((g) => [g.lat, g.lon]), { padding: [50, 50], maxZoom: 16 });
 else map.setView([45, 25], 6);
