@@ -91,3 +91,41 @@ button.option:hover { background: #e6efeb; }
 .gem-form label { display: grid; gap: 0.3rem; }
 .gem-form input, .gem-form select, .gem-form textarea { font: inherit; padding: 0.55rem; }
 .gem-form .actions { display: flex; gap: 0.6rem; }
+
+/* Map surfaces share the app's moss, parchment and brass palette. */
+.map-panel { position: relative; min-width: 0; min-height: 0; isolation: isolate; }
+.map-panel #map { width: 100%; height: 100%; background: #dce8e4; }
+.map-status {
+    position: absolute; top: 1rem; left: 4rem; right: 1rem; z-index: 500;
+    width: fit-content; max-width: calc(100% - 5rem); margin: 0;
+    padding: .65rem .85rem; border: 1px solid var(--line); border-radius: 12px;
+    background: var(--panel); color: var(--ink); font-size: .8rem;
+    box-shadow: 0 4px 18px rgba(30, 43, 51, .12); pointer-events: none;
+}
+.map-legend {
+    position: absolute; left: 1rem; bottom: 2.5rem; z-index: 500;
+    display: flex; flex-wrap: wrap; gap: .8rem; padding: .65rem .85rem;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--panel);
+    box-shadow: 0 4px 18px rgba(30, 43, 51, .12); font-size: .75rem;
+    pointer-events: none;
+}
+.map-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.legend-dot { width: .65rem; height: .65rem; border-radius: 50%; background: var(--brass); }
+.legend-dot.collected { background: var(--moss); }
+.pin { background: var(--brass); box-shadow: 0 3px 10px rgba(30, 43, 51, .28); }
+.leaflet-container { font-family: "Alegreya Sans", system-ui, sans-serif; }
+.leaflet-container .leaflet-control-zoom {
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    box-shadow: 0 4px 18px rgba(30, 43, 51, .12);
+}
+.leaflet-control-zoom a { background: var(--panel); color: var(--ink); }
+.leaflet-control-zoom a:hover { background: #e6efeb; }
+.leaflet-popup-content-wrapper { border-radius: 14px; background: var(--panel); color: var(--ink); }
+.leaflet-popup-tip { background: var(--panel); }
+.leaflet-popup-content { line-height: 1.6; }
+.leaflet-container .leaflet-control-attribution { background: rgba(243, 247, 245, .95); }
+.leaflet-container .leaflet-control-attribution a { color: #285d4b; }
+@media (max-width: 800px) {
+    .map-legend { left: .6rem; bottom: 3rem; padding: .45rem .65rem; gap: .6rem; }
+    .map-status { top: .6rem; }
+}
