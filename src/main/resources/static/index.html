@@ -20,6 +20,11 @@
     <section class="map-panel" aria-label="Explore hidden gems">
         <div id="map" aria-label="Interactive map of hidden gems"></div>
         <p id="map-status" class="map-status" role="status" hidden></p>
+        <nav id="map-views" class="map-views" aria-label="Map views" hidden>
+            <button type="button" id="view-globe">Globe</button>
+            <button type="button" id="view-gems">Explore gems</button>
+        </nav>
+        <div id="map-detail" class="map-detail" role="region" aria-label="Gem details" hidden></div>
         <div class="map-legend" aria-label="Map legend">
             <span><i class="legend-dot"></i> To discover</span>
             <span><i class="legend-dot collected"></i> Collected</span>
@@ -47,6 +52,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="api.js"></script>
 <script src="map-layer.js"></script>
+<script src="globe.js"></script>
 <script src="boot.js"></script>
 <script src="social.js"></script>
 <script src="rewards.js"></script>

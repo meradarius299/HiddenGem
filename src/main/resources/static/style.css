@@ -129,3 +129,12 @@ button.option:hover { background: #e6efeb; }
     .map-legend { left: .6rem; bottom: 3rem; padding: .45rem .65rem; gap: .6rem; }
     .map-status { top: .6rem; }
 }
+
+.map-views { position: absolute; top: 1rem; left: 1rem; z-index: 500; display: flex; gap: .5rem; }
+.map-views[hidden], .map-detail[hidden] { display: none; }
+.map-views button { border-radius: 999px; background: var(--panel); color: var(--ink); box-shadow: 0 3px 15px #0003; }
+.map-detail { position: absolute; top: 4.5rem; left: 1rem; z-index: 500; padding: 1rem; max-width: calc(100% - 2rem); background: var(--panel); border-radius: 14px; box-shadow: 0 4px 18px #0003; }
+.map-detail button { margin-top: .7rem; }
+.map-mode-note { position: absolute; top: .6rem; right: .6rem; z-index: 500; padding: .4rem .6rem; margin: 0; border-radius: 8px; background: var(--panel); font-size: .7rem; pointer-events: none; }
+.map-panel:has(.map-views:not([hidden])) .map-legend { bottom: 4rem; }
+.map-panel:has(.map-mode-note) .map-status { top: 3rem; }

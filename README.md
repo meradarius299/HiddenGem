@@ -1,44 +1,65 @@
 # Hidden Gems
 
-A Spring Boot application for discovering nearby places and collecting their stories.
+Discover nearby places and collect their stories.
 
-## MapTiler setup
+## Google 3D globe
 
-The map uses Leaflet with MapTiler Streets raster tiles. Existing gem markers,
-location tracking, adding gems and collection remain in Leaflet. OpenStreetMap
-is used if the key is absent, configuration fails, or MapTiler tiles fail.
+With `GOOGLE_MAPS_API_KEY` set, the app opens a Google Maps 3D globe.
+Use **Explore gems** to fly to the first gem with an angled camera, click gems in
+the list to visit them, and **Globe** to return to the planet view. The map supports
+rotation, tilt, zoom, interactive gem markers and your current position.
+Google's built-in controls and attribution remain visible.
 
-1. Create a browser map key at https://cloud.maptiler.com/account/keys/.
-2. Set `MAPTILER_API_KEY` in the environment used to start the backend.
-3. Restart the backend and reload the app.
+Google renders photorealistic buildings only where it has 3D coverage. Elsewhere
+you see satellite imagery and terrain. This implementation uses the Maps JavaScript
+API beta channel with the `maps3d` and `marker` libraries.
 
-PowerShell, from the repository directory, with the existing database/auth settings configured:
+### Setup
+
+1. Create/select a Google Cloud project, enable billing and enable **Maps JavaScript API**.
+2. Create a browser API key. Restrict it to Maps JavaScript API and your website's
+   HTTP referrers (including your local development URL when needed).
+3. Set the key in the backend environment and restart.
+
+PowerShell from the repository directory, with the existing database/auth settings configured:
 
 ```powershell
-$env:MAPTILER_API_KEY = "your-maptiler-key"
+$env:GOOGLE_MAPS_API_KEY = "your-google-maps-key"
 .\mvnw.cmd spring-boot:run
 ```
 
-For an IDE run configuration, add `MAPTILER_API_KEY=your-maptiler-key` to its environment variables.
-Optionally set `MAPTILER_MAP_ID` to a MapTiler map ID supporting raster tiles (default: `streets-v4`).
-Use an ID, not a style URL.
+For an IDE, add `GOOGLE_MAPS_API_KEY=your-google-maps-key` to its run configuration.
+Map loads can incur Google Maps Platform charges. Review pricing and quotas in your
+Google Cloud project. No key or billing configuration is created by this code.
 
-The public `GET /api/config/map` endpoint returns only the map key and style.
-The key is visible in browser network requests by design. Use a dedicated map key
-and restrict its **Allowed HTTP origins** in MapTiler to your deployed domain.
-Use a separate development key allowing `localhost` or `127.0.0.1` as appropriate.
-Do not commit actual keys.
+The public `GET /api/config/map` endpoint exposes only browser map settings.
+Browser API keys are visible in network requests by design; restrict them at the
+provider and do not commit actual keys.
 
-- [MapTiler Leaflet raster integration](https://docs.maptiler.com/leaflet/examples/raster-tiles-in-leaflet-js/)
-- [Key and origin settings](https://docs.maptiler.com/guides/developer/credentials/api-key/)
+- [Google 3D maps and coverage](https://developers.google.com/maps/documentation/javascript/3d/overview)
+- [Google API key setup](https://developers.google.com/maps/documentation/javascript/get-api-key)
+- [Google usage and billing](https://developers.google.com/maps/documentation/javascript/usage-and-billing)
+
+## 2D fallback
+
+If no Google key is configured, initialization fails, or the browser cannot render
+3D, the app falls back to its Leaflet map and labels it as 2D.
+Optionally set `MAPTILER_API_KEY` for MapTiler Streets fallback tiles and
+`MAPTILER_MAP_ID` for a custom raster map ID (default `streets-v4`).
+Without a MapTiler key, or if its tiles fail, OpenStreetMap is used.
+Restrict the MapTiler browser key to allowed origins in its dashboard.
 
 ## Verification
 
-Run frontend tests with `node --test tests/map-layer.test.cjs` (Node 18+).
-Run Java tests with `.\mvnw.cmd test` (JDK 26, as configured in pom.xml).
+Run `node --test tests/*.test.cjs` with Node 18+ and `.\mvnw.cmd test` with JDK 26.
 
-Log in and check desktop and mobile layouts:
-- A valid key displays Streets tiles and MapTiler/OpenStreetMap attribution.
-- A missing or rejected key displays the standard map and a status message.
-- Gem clicks, list navigation, fake location, adding gems and collection still work.
-- Zoom controls, the legend and attribution remain readable.
+Before merging, test with a valid Google key in a browser at desktop and mobile sizes:
+- The globe renders; Explore gems and Globe move the camera in both directions.
+- Rotate, tilt and zoom near a Google-covered city to check 3D buildings.
+- Clicking a gem shows its hint/story; collected markers change color.
+- List and social-panel navigation fly to the chosen gem.
+- Real/fake location, click-to-add, collecting and resetting keys still work.
+- Clicking the sky does not add a gem or change your fake location.
+- Missing/rejected keys and blocked Google scripts fall back to 2D.
+- Attribution, native controls, legend and gem details remain readable.
+- Reduced-motion preference disables flight animation.

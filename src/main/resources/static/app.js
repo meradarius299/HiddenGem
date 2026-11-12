@@ -38,41 +38,9 @@ let player = null;
 const distTo = (g) => (player ? distanceM(player.lat, player.lon, g.lat, g.lon) : null);
 const fmt = (m) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
 
-const WORLD = L.latLngBounds([[-85, -180], [85, 180]]);
-
-const map = L.map("map", {
-    maxBounds: WORLD,
-    maxBoundsViscosity: 1.0
-});
-
-const fitWorld = () => map.setMinZoom(map.getBoundsZoom(WORLD, true));
-fitWorld();
-map.on("resize", fitWorld);
-
-// Basemap loading does not block gem or location interactions.
-HiddenGemMap.addBasemap(map, WORLD);
-L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
-
-if (GEMS.length) map.fitBounds(GEMS.map((g) => [g.lat, g.lon]), { padding: [50, 50], maxZoom: 16 });
-else map.setView([45, 25], 6);
-
-const playerMarker = L.circleMarker([0, 0], {
-    radius: 8, color: "#fff", weight: 3, fillColor: "#1e5fa8", fillOpacity: 1
-});
-
-const pinIcon = (done) => L.divIcon({
-    className: "",
-    html: `<div class="pin ${done ? "done" : ""}">${done ? "✦" : "?"}</div>`,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17]
-});
-
+const map = window.GEM_MAP;
 const markers = new Map();
-GEMS.forEach((g) => {
-    const m = L.marker([g.lat, g.lon], { icon: pinIcon(false) }).addTo(map);
-    m.on("click", () => onGemClick(g));
-    markers.set(g.id, m);
-});
+GEMS.forEach((g) => markers.set(g.id, map.addGem(g, () => onGemClick(g))));
 
 function onGemClick(g) {
     if (unlocked.has(g.id)) return openStory(g);
@@ -81,11 +49,11 @@ function onGemClick(g) {
     box.append(el("strong", g.hint));
     box.append(el("br"));
     box.append(el("span", d === null ? "Waiting for your location..." : `${fmt(d)} away`));
-    L.popup().setLatLng([g.lat, g.lon]).setContent(box).openOn(map);
+    map.showPopup(g, box);
 }
 
 function updateUI() {
-    markers.forEach((m, id) => m.setIcon(pinIcon(unlocked.has(id))));
+    markers.forEach((m, id) => m.setCollected(unlocked.has(id)));
     $("keys").textContent = `${unlocked.size} / ${GEMS.length} keys`;
     renderList();
     checkNearby();
@@ -203,7 +171,7 @@ function setStatus(msg) { $("status").textContent = msg; }
 
 function setPlayer(lat, lon) {
     player = { lat, lon };
-    playerMarker.setLatLng([lat, lon]).addTo(map);
+    map.setPlayer(lat, lon);
     updateUI();
 }
 
@@ -295,7 +263,7 @@ function openGemForm(lat, lon) {
     dlg.showModal();
 }
 
-map.on("click", (e) => {
+map.onClick((e) => {
     if (picking) {
         setPicking(false);
         openGemForm(e.latlng.lat, e.latlng.lng);
