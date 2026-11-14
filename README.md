@@ -44,10 +44,7 @@ provider and do not commit actual keys.
 
 If no Google key is configured, initialization fails, or the browser cannot render
 3D, the app falls back to its Leaflet map and labels it as 2D.
-Optionally set `MAPTILER_API_KEY` for MapTiler Streets fallback tiles and
-`MAPTILER_MAP_ID` for a custom raster map ID (default `streets-v4`).
-Without a MapTiler key, or if its tiles fail, OpenStreetMap is used.
-Restrict the MapTiler browser key to allowed origins in its dashboard.
+The Leaflet fallback uses OpenStreetMap tiles.
 
 ## Verification
 
