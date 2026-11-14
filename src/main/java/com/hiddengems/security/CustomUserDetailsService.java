@@ -22,13 +22,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         String password = user.getPasswordHash() == null ? "" : user.getPasswordHash();
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(password)
-                .authorities(user.getRoles().stream()
+        return new AppUserDetails(user.getUsername(), password,
+                user.isEnabled() && (user.getProvider() != com.hiddengems.entity.AuthProvider.LOCAL || user.isEmailVerified()),
+                user.getRoles().stream()
                         .map(r -> new SimpleGrantedAuthority(r.getName().name()))
-                        .toList())
-                .disabled(!user.isEnabled())
-                .build();
+                        .toList(), user.getTokenVersion());
     }
 }

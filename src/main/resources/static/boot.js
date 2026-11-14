@@ -68,11 +68,6 @@
         out.textContent = "Log out";
         out.addEventListener("click", () => { API.logout(); location.assign("/"); });
         account.append(who, out);
-        const presentation = document.createElement("a");
-        presentation.className = "presentation-link";
-        presentation.href = "/";
-        presentation.textContent = "About";
-        account.insertBefore(presentation, out);
         if (API.isAdmin()) {
             const hiddenButton = document.createElement("button");
             hiddenButton.type = "button";

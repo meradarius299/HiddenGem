@@ -171,14 +171,12 @@
 
         window.addEventListener("key-collected", (e) => {
             ((e.detail && e.detail.newBadges) || []).forEach((name) => toast(MEDAL + " Badge earned: " + name));
-            refresh();
+            if (dlg.open) refresh();
         });
-        window.addEventListener("progress-reset", refresh);
+        window.addEventListener("progress-reset", () => { if (dlg.open) refresh(); });
         setInterval(() => {
             if (!document.hidden && dlg.open && view === "board") fetchBoard().then(render);
         }, 30000);
-
-        refresh();
     }
 
     // boot.js sets GEMS_DATA and builds the header once the player is logged in and the gems are loaded.

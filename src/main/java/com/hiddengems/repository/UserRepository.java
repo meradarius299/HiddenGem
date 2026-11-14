@@ -12,11 +12,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByEmailIgnoreCase(String email);
+
     Optional<User> findByGoogleId(String googleId);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 
     /** Cautare dupa o parte din username (pentru adaugarea de prieteni), fara utilizatorul curent. */
     List<User> findTop20ByUsernameContainingIgnoreCaseAndIdNotAndEnabledTrue(String fragment, Long excludedId);

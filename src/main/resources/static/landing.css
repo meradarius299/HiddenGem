@@ -5,7 +5,7 @@ body { margin: 0; min-width: 320px; }
 a { color: inherit; text-decoration: none; }
 .topbar { height: 78px; padding: 0 clamp(1.2rem, 6vw, 6.5rem); display: flex; justify-content: space-between; align-items: center; background: rgba(255,253,248,.8); border-bottom: 1px solid rgba(229,223,210,.7); }
 .brand { display: inline-flex; align-items: center; gap: .55rem; font: 600 1.3rem "Alegreya", Georgia, serif; color: var(--forest); white-space: nowrap; }
-.brand-mark { color: var(--gold); font-size: 1.25rem; }
+.brand-mark { width: 25px; height: 25px; flex: 0 0 auto; color: var(--gold); }
 .topbar nav { display: flex; align-items: center; gap: clamp(.8rem, 2.2vw, 2.2rem); font-size: .94rem; }
 .nav-link, .text-link { color: #5d6b61; transition: color .2s; }
 .nav-link:hover, .text-link:hover { color: var(--forest); }

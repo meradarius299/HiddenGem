@@ -107,6 +107,36 @@ button.option:hover { background: #e6efeb; }
     main { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
     aside { border-left: 0; border-top: 1px solid var(--line); }
 }
+
+/* Premium explorer finish */
+header { min-height: 4.5rem; padding-inline: 1.5rem; background: linear-gradient(110deg,#17382d,#285541 72%,#315f49); }
+header h1 { font-size: 1.55rem; letter-spacing: -.02em; }
+#keys { border-color: rgba(231,207,157,.3); background: rgba(255,255,255,.08); }
+main { gap: 1rem; padding: 1rem; }
+.map-panel { border-radius: 22px; box-shadow: 0 14px 40px rgba(40,55,46,.12); }
+aside { padding: 1rem .8rem; border-radius: 22px; box-shadow: 0 12px 36px rgba(40,55,46,.075); }
+#add-gem { min-height: 48px; box-shadow: 0 8px 18px rgba(57,118,92,.17); }
+#toggle-gem-list, #hidden-gems-button { min-height: 44px; }
+#list button { padding: .9rem .8rem; transition: background .18s, padding .18s; }
+#list button:hover { padding-left: 1rem; }
+.map-status, .map-legend { box-shadow: 0 8px 24px rgba(30,43,35,.12); }
+.map-detail { border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 16px 40px rgba(30,43,35,.18); }
+dialog { padding: 1.8rem; }
+@media (max-width: 800px) { main { padding: 0; }.map-panel { border-radius: 0; }.map-legend { border-radius: 12px; }header { min-height: 3.9rem; padding-inline: .8rem; } }
+
+/* Restrained explorer styling */
+header { box-shadow: none; }
+main { gap: .7rem; padding: .7rem; }
+.map-panel { border-radius: 10px; box-shadow: 0 3px 12px rgba(40,55,46,.07); }
+aside { border-radius: 10px; box-shadow: 0 3px 12px rgba(40,55,46,.05); }
+#add-gem { box-shadow: none; }
+button { transition: background-color .14s ease, border-color .14s ease; }
+button:not(:disabled):hover { box-shadow: none; }
+button:not(:disabled):active { transform: none; }
+.map-status, .map-legend { backdrop-filter: none; box-shadow: 0 2px 8px rgba(30,43,35,.08); }
+.map-detail, dialog { border-radius: 8px; box-shadow: 0 8px 24px rgba(30,43,35,.14); }
+dialog::backdrop { backdrop-filter: none; }
+@media (max-width: 800px) { .map-panel, aside { border-radius: 0; box-shadow: none; } }
 #add-gem, #hidden-gems-button { display: block; width: calc(100% - 2rem); margin: 0.8rem 1rem; }
 #toggle-gem-list { display: none; }
 .gem-form { display: grid; gap: 0.9rem; margin-top: 0.5rem; }

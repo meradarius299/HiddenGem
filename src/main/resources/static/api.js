@@ -63,10 +63,8 @@ const API = (() => {
         },
         login: async (username, password) =>
             save(await request("/api/auth/login", {method: "POST", body: {username, password}})),
-        register: async (username, email, password) => {
-            const r = await request("/api/auth/register", {method: "POST", body: {username, email, password}});
-            return r && r.token ? save(r) : API.login(username, password);
-        },
+        register: (username, email, password) =>
+            request("/api/auth/register", {method: "POST", body: {username, email, password}}),
         googleLogin: async (idToken) =>
             save(await request("/api/auth/google", {method: "POST", body: {idToken}})),
         getGems: () => request("/api/gems"),

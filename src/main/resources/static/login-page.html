@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/hidden-gems-icon.svg">
     <title>Log in · Hidden Gems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,11 +34,19 @@
             </label>
             <label>
                 Password
-                <input name="password" type="password" autocomplete="current-password" required>
+                <span class="password-wrap">
+                    <input name="password" type="password" autocomplete="current-password" required>
+                    <button type="button" class="password-toggle" data-password-toggle aria-label="Show password" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="eye-shape" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle class="eye-pupil" cx="12" cy="12" r="3"/><path class="eye-slash" d="M3 3 21 21"/></svg>
+                    </button>
+                </span>
             </label>
             <button type="submit" id="submit" class="btn-primary">Log In</button>
             <p id="message" class="form-message" role="alert"></p>
         </form>
+
+        <p id="forgot-row" class="auth-aux"><a href="/forgot-password">Forgot password?</a></p>
+        <p class="auth-aux"><a id="resend-verification-link" href="/resend-verification" hidden>Resend verification email</a></p>
 
         <div id="google-block" hidden>
             <div class="auth-divider"><span>or</span></div>

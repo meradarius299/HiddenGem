@@ -60,3 +60,11 @@ Before merging, test with a valid Google key in a browser at desktop and mobile 
 - Missing/rejected keys and blocked Google scripts fall back to 2D.
 - Attribution, native controls, legend and gem details remain readable.
 - Reduced-motion preference disables flight animation.
+
+## Local email testing with Mailpit
+
+Start Docker Desktop, then run docker compose up -d mailpit from this repository. Open the inbox at http://localhost:8025. Spring sends local verification and password reset messages to Mailpit at localhost:1025; no real email is delivered.
+
+Register an account, open its verification message in Mailpit, and follow the link. Use Forgot password? on the login page to try password recovery. Verification links expire after 24 hours; reset links expire after 30 minutes. Tokens are single-use and stored as hashes.
+
+For a deployed app, configure a real transactional email provider and a verified sender domain through deployment environment variables. Do not leave the deployed app pointed at Mailpit.

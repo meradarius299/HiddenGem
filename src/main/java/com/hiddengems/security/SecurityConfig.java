@@ -29,7 +29,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // API stateless cu token, fara cookie-uri
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/explore", "/landing.html", "/landing.css", "/home.html", "/login", "/login.html", "/login-page.html", "/*.js", "/*.css", "/favicon.ico").permitAll()
+                        .requestMatchers("/", "/index.html", "/explore", "/landing.html", "/landing.css", "/home.html",
+                                "/login", "/login.html", "/login-page.html", "/verify-email", "/verify-email.html",
+                                "/forgot-password", "/forgot-password.html", "/reset-password", "/reset-password.html",
+                                "/resend-verification", "/resend-verification.html", "/*.js", "/*.css", "/favicon.ico",
+                                "/hidden-gems-icon.svg").permitAll()
                         .requestMatchers("/api/auth/**", "/api/config/map", "/api/config/auth", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

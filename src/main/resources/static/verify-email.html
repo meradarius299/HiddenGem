@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/hidden-gems-icon.svg">
+    <title>Verify email · Hidden Gems</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+<section class="auth-screen">
+    <a class="landing-return" href="/">← Back to presentation</a>
+    <div class="auth-story">
+        <span class="story-star">✦</span><p class="story-kicker">ONE LAST STEP</p>
+        <h1>Confirm your<br>email address.</h1>
+        <p>Verify your address to finish creating your Hidden Gems account.</p>
+    </div>
+    <div class="auth-card">
+        <div class="wordmark">Hidden Gems<span>EMAIL VERIFICATION</span></div>
+        <p id="message" class="form-message" role="status">Checking your link…</p>
+        <p class="auth-aux"><a id="login-link" href="/login" hidden>Go to login</a></p>
+    </div>
+</section>
+<script src="api.js"></script>
+<script src="verify-email.js"></script>
+</body>
+</html>

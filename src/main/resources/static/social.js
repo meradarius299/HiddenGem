@@ -120,6 +120,8 @@
     let tab = "notifications";
     let lastCount = -1;
     let pageRequest = 0;
+    const pageCache = new Map();
+    const PAGE_CACHE_MS = 1500;
 
     function say(text, isError) {
         status.textContent = text || "";
@@ -134,7 +136,7 @@
             badge.hidden = count === 0;
             const changed = lastCount !== -1 && count !== lastCount;
             lastCount = count;
-            if (rerender && changed && dlg.open && tab === "notifications") show("notifications");
+            if (rerender && changed && dlg.open && tab === "notifications") show("notifications", true);
         } catch (err) {
         }
     }
@@ -161,8 +163,8 @@
             await refreshBadge(false);
         }
         if ((n.type === "NEW_GEM" || n.type === "BUMP") && n.gemId) goToGem(n.gemId);
-        else if (n.type === "FRIEND_REQUEST") show("friends");
-        else show("notifications");
+        else if (n.type === "FRIEND_REQUEST") show("friends", true);
+        else show("notifications", true);
     }
 
     async function buildNotifications() {
@@ -183,7 +185,7 @@
                     return;
                 }
                 await refreshBadge(false);
-                show("notifications");
+                show("notifications", true);
             }
         }, "Mark all as read");
 
@@ -226,7 +228,7 @@
             return;
         }
         await refreshBadge(false);
-        show("friends");
+        show("friends", true);
     }
 
     async function removeFriend(user) {
@@ -237,7 +239,7 @@
             say(errText(err, {404: "You are not friends."}), true);
             return;
         }
-        show("friends");
+        show("friends", true);
     }
 
     async function blockFriend(user) {
@@ -249,7 +251,7 @@
             return;
         }
         say(`${user.username} was blocked.`);
-        show("friends");
+        show("friends", true);
     }
 
     function profileStats(profile) {
@@ -411,25 +413,39 @@
                         try {
                             await API.request(`/api/friends/${user.id}/block`, {method: "DELETE"});
                             say(`${user.username} was unblocked.`);
-                            show("friends");
+                            show("friends", true);
                         } catch (err) { say(errText(err), true); }
                     }}, "Unblock"))))));
         }
         return nodes;
     }
 
-    async function show(name) {
+    async function show(name, forceRefresh = false) {
         const requestId = ++pageRequest;
         tab = name;
         Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === name)));
         say("");
-        body.replaceChildren(h("p", {class: "soc-muted", text: "Loading..."}));
+        const cached = pageCache.get(name);
+        if (!forceRefresh && cached && Date.now() - cached.savedAt < PAGE_CACHE_MS) {
+            body.replaceChildren(...cached.nodes);
+            return;
+        }
+        const loadingTimer = setTimeout(() => {
+            if (requestId === pageRequest && tab === name) {
+                body.replaceChildren(h("p", {class: "soc-muted", text: "Loading..."}));
+            }
+        }, 150);
         try {
             const nodes = await (name === "notifications" ? buildNotifications()
                 : name === "feed" ? buildFeed()
                     : buildFriends());
-            if (requestId === pageRequest && tab === name) body.replaceChildren(...nodes);
+            clearTimeout(loadingTimer);
+            if (requestId === pageRequest && tab === name) {
+                pageCache.set(name, {nodes, savedAt: Date.now()});
+                body.replaceChildren(...nodes);
+            }
         } catch (err) {
+            clearTimeout(loadingTimer);
             if (requestId === pageRequest && tab === name) body.replaceChildren(h("p", {class: "soc-error", text: errText(err)}));
         }
     }

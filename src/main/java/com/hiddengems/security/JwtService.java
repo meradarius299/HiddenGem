@@ -34,6 +34,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("roles", roles)
+                .claim("ver", user instanceof AppUserDetails appUser ? appUser.getTokenVersion() : 0)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expirationMs))
                 .signWith(key)
@@ -45,7 +46,10 @@ public class JwtService {
     }
     public boolean isValid(String token, UserDetails user) {
         try {
-            return parse(token).getSubject().equals(user.getUsername());
+            Claims claims = parse(token);
+            int tokenVersion = claims.get("ver", Integer.class) == null ? 0 : claims.get("ver", Integer.class);
+            int currentVersion = user instanceof AppUserDetails appUser ? appUser.getTokenVersion() : 0;
+            return claims.getSubject().equals(user.getUsername()) && tokenVersion == currentVersion;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }

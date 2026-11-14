@@ -50,6 +50,12 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default true")
+    private boolean emailVerified = true;
+
+    @Column(name = "token_version", nullable = false, columnDefinition = "integer default 0")
+    private int tokenVersion;
+
     @Column(name = "bumps_enabled", nullable = false)
     private boolean bumpsEnabled = true;
 

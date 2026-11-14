@@ -3,6 +3,7 @@ package com.hiddengems.service.impl;
 import com.hiddengems.dto.AuthResponse;
 import com.hiddengems.dto.GoogleLoginRequest;
 import com.hiddengems.dto.LoginRequest;
+import com.hiddengems.dto.MessageResponse;
 import com.hiddengems.dto.RegisterRequest;
 import com.hiddengems.entity.AuthProvider;
 import com.hiddengems.entity.Role;
@@ -15,6 +16,7 @@ import com.hiddengems.security.GoogleTokenVerifier;
 import com.hiddengems.security.GoogleTokenVerifier.GoogleUser;
 import com.hiddengems.security.JwtService;
 import com.hiddengems.service.AuthService;
+import com.hiddengems.service.AccountEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,29 +47,45 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
     private final GoogleTokenVerifier googleTokenVerifier;
+    private final AccountEmailService accountEmailService;
 
     @Override
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public MessageResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already used");
         }
-        if (userRepository.existsByEmail(request.email())) {
+        String email = request.email().trim().toLowerCase(java.util.Locale.ROOT);
+        if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already used");
         }
 
         User user = new User();
         user.setUsername(request.username());
-        user.setEmail(request.email());
+        user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setEmailVerified(false);
         user.setRoles(new HashSet<>(Set.of(defaultRole())));
         userRepository.save(user);
-
-        return login(new LoginRequest(request.username(), request.password()));
+        try {
+            accountEmailService.sendVerification(user);
+        } catch (MailException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Account email could not be sent. Try again shortly.", exception);
+        }
+        return new MessageResponse("Account created. Check your email for the verification link.");
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
+        userRepository.findByUsername(request.username())
+                .filter(user -> user.getProvider() == AuthProvider.LOCAL && !user.isEmailVerified())
+                .ifPresent(user -> {
+                    if (passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+                        throw new org.springframework.web.server.ResponseStatusException(
+                                HttpStatus.FORBIDDEN, "Verify your email before signing in.");
+                    }
+                });
         Authentication auth;
         try {
             auth = authenticationManager.authenticate(
@@ -88,6 +107,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByGoogleId(google.subject())
                 .or(() -> userRepository.findByEmail(google.email()).map(existing -> {
                     existing.setGoogleId(google.subject());
+                    existing.setEmailVerified(true);
                     return existing;
                 }))
                 .orElseGet(() -> createGoogleUser(google));
@@ -104,6 +124,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(google.email());
         user.setProvider(AuthProvider.GOOGLE);
         user.setGoogleId(google.subject());
+        user.setEmailVerified(true);
         user.setRoles(new HashSet<>(Set.of(defaultRole())));
         return userRepository.save(user);
     }

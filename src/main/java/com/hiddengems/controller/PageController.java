@@ -26,6 +26,26 @@ public class PageController {
         return "forward:/login-page.html";
     }
 
+    @GetMapping("/verify-email")
+    public String verifyEmail() {
+        return "forward:/verify-email.html";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword() {
+        return "forward:/forgot-password.html";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword() {
+        return "forward:/reset-password.html";
+    }
+
+    @GetMapping("/resend-verification")
+    public String resendVerification() {
+        return "forward:/resend-verification.html";
+    }
+
     @GetMapping("/login.html")
     public String redirectLoginToCleanUrl() {
         return "redirect:/login";

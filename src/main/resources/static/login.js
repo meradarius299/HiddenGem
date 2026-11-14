@@ -9,6 +9,17 @@
     const emailRow = $("email-row");
     const passwordInput = form.elements.password;
 
+    document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+        const input = button.closest(".password-wrap").querySelector("input");
+        button.addEventListener("click", () => {
+            const visible = input.type === "password";
+            input.type = visible ? "text" : "password";
+            button.setAttribute("aria-label", visible ? "Hide password" : "Show password");
+            button.setAttribute("aria-pressed", String(visible));
+        });
+        button.setAttribute("aria-label", "Show password");
+    });
+
     if (API.isLoggedIn()) {
         location.replace("/explore");
         return;
@@ -24,6 +35,8 @@
     function setMode(on) {
         registering = on;
         emailRow.hidden = !on;
+        $("forgot-row").hidden = on;
+        $("resend-verification-link").hidden = true;
         passwordInput.autocomplete = on ? "new-password" : "current-password";
         submit.textContent = on ? "Create account" : "Log In";
         $("switch-text").textContent = on ? "Already have an account?" : "Don't have an account?";
@@ -41,9 +54,10 @@
                             : "Could not reach the server. Is the backend running?";
         }
         return err.status === 401 ? "Wrong username or password."
+            : err.status === 403 ? "Verify your email before signing in."
             : err.status === 409 ? "That username or email is already taken."
                 : err.status === 400 ? "Check the fields: username 3+ characters, valid email, password 6+."
-                    : err.status === 503 ? "This sign-in method is not available right now."
+            : err.status === 503 ? "Email delivery is unavailable. Check Mailpit and try again."
                         : "Could not reach the server. Is the backend running?";
     }
 
@@ -69,11 +83,19 @@
         say("");
         submit.disabled = true;
         try {
-            if (registering) await API.register(username, email, password);
-            else await API.login(username, password);
+            if (registering) {
+                await API.register(username, email, password);
+                form.reset();
+                setMode(false);
+                say("Account created. Check your email for the verification link. During local development, open the Mailpit inbox at http://localhost:8025.", true);
+                submit.disabled = false;
+                return;
+            }
+            await API.login(username, password);
             goToGame();
         } catch (err) {
             say(errorText(err));
+            $("resend-verification-link").hidden = err.status !== 403;
             submit.disabled = false;
         }
     });
