@@ -62,6 +62,7 @@ build/
 # ==========================================
 *.log
 application-local.properties
+**/application*.properties
 hs_err_pid*
 replay_pid*
 
