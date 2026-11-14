@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 window.HiddenGemMap = {
     async addBasemap(map, bounds) {

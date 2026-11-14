@@ -1,6 +1,8 @@
 package com.hiddengems.repository;
 
 import com.hiddengems.entity.CollectedGem;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +19,15 @@ public interface CollectedGemRepository extends JpaRepository<CollectedGem, Long
     /** Ids of the gems the user has collected. */
     @Query("select c.gem.id from CollectedGem c where c.user.id = :userId")
     List<Long> findGemIdsByUserId(@Param("userId") Long userId);
+
+    @EntityGraph(attributePaths = {"user", "gem", "gem.owner"})
+    List<CollectedGem> findByUserIdIn(Collection<Long> userIds, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "gem", "gem.owner"})
+    List<CollectedGem> findByUserIdIn(Collection<Long> userIds);
+
+    @EntityGraph(attributePaths = "gem")
+    List<CollectedGem> findByUserIdOrderByCollectedAtDesc(Long userId);
 
     void deleteByUserId(Long userId);
 

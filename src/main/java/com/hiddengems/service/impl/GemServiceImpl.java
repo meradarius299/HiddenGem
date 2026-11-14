@@ -27,7 +27,13 @@ public class GemServiceImpl implements GemService {
     @Override
     @Transactional(readOnly = true)
     public List<GemResponse> findAll() {
-        return gemRepository.findAllByOrderByCreatedAtDesc().stream().map(GemResponse::from).toList();
+        return gemRepository.findAllByVisibleTrueOrderByCreatedAtDesc().stream().map(GemResponse::from).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GemResponse> findHidden() {
+        return gemRepository.findAllByVisibleFalseOrderByCreatedAtDesc().stream().map(GemResponse::from).toList();
     }
 
     @Override
@@ -73,9 +79,9 @@ public class GemServiceImpl implements GemService {
 
     @Override
     @Transactional
-    public GemResponse setVerified(Long id, boolean verified) {
+    public GemResponse setVisible(Long id, boolean visible) {
         Gem gem = getOrThrow(id);
-        gem.setVerified(verified);
+        gem.setVisible(visible);
         return GemResponse.from(gem);
     }
 

@@ -1,6 +1,5 @@
 package com.hiddengems.util;
 
-/** Geographic helpers. */
 public final class GeoUtils {
 
     private static final double EARTH_RADIUS_M = 6_371_000;
@@ -8,7 +7,6 @@ public final class GeoUtils {
     private GeoUtils() {
     }
 
-    /** Distance in meters between two points on Earth (Haversine formula). */
     public static double distanceMeters(double lat1, double lon1, double lat2, double lon2) {
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);

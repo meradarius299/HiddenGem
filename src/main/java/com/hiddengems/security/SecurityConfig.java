@@ -29,8 +29,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // API stateless cu token, fara cookie-uri
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/login.html", "/*.js", "/*.css", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/config/map", "/error").permitAll()
+                        .requestMatchers("/", "/index.html", "/explore", "/landing.html", "/landing.css", "/home.html", "/login", "/login.html", "/login-page.html", "/*.js", "/*.css", "/favicon.ico").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/config/map", "/api/config/auth", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,11 +1,14 @@
 package com.hiddengems.service;
 
-import com.hiddengems.dto.GemResponse;
+import com.hiddengems.dto.FriendFeedItem;
+import com.hiddengems.dto.FriendDiscoveryResponse;
 
 import java.util.List;
 
 public interface FeedService {
 
-    /** Ultimele locuri adaugate de prietenii utilizatorului. */
-    List<GemResponse> friendsFeed(String username);
+    /** Recent gems added or discovered by the user's friends. */
+    List<FriendFeedItem> friendsFeed(String username);
+
+    List<FriendDiscoveryResponse> friendsDiscoveries(String username);
 }

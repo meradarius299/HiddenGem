@@ -7,9 +7,11 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,20 @@ public class GoogleTokenVerifierImpl implements GoogleTokenVerifier {
                     email,
                     jwt.getClaimAsString("name"),
                     Boolean.TRUE.equals(jwt.getClaimAsBoolean("email_verified")));
+        } catch (JwtValidationException e) {
+            String descriptions = e.getErrors().stream()
+                    .map(OAuth2Error::getDescription)
+                    .filter(description -> description != null && !description.isBlank())
+                    .collect(Collectors.joining("; "));
+            if (descriptions.contains("Audienta invalida")) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "Google token audience does not match app.google.client-ids");
+            }
+            if (descriptions.contains("Emitent invalid")) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Google token issuer is invalid");
+            }
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    descriptions.isBlank() ? "Google token validation failed" : descriptions);
         } catch (JwtException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token Google");
         }

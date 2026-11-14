@@ -45,8 +45,8 @@ public class Gem {
     @Column(length = 40)
     private String category;
 
-    @Column(nullable = false)
-    private boolean verified = false;
+    @Column(nullable = false, columnDefinition = "boolean not null default true")
+    private boolean visible = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -2,10 +2,6 @@
 
 // Login / register page. On success the JWT is stored by api.js and we go to the game.
 (function () {
-    // Web OAuth client ID for "Continue with Google". Leave empty to hide the button.
-    // The same ID must also be listed in the backend property app.google.client-ids.
-    const GOOGLE_CLIENT_ID = "820459243630-b8d6pc0gkdrvl9rgfma149q7n56evs55.apps.googleusercontent.com";
-
     const $ = (id) => document.getElementById(id);
     const form = $("auth-form");
     const message = $("message");
@@ -14,7 +10,7 @@
     const passwordInput = form.elements.password;
 
     if (API.isLoggedIn()) {
-        location.replace("index.html");
+        location.replace("/explore");
         return;
     }
 
@@ -36,7 +32,14 @@
         say("");
     }
 
-    function errorText(err) {
+    function errorText(err, google = false) {
+        if (google) {
+            return err.status === 401 ? (err.detail || "Google sign-in token was rejected. Check that the Client ID in login.js matches GOOGLE_CLIENT_IDS or GOOGLE_OAUTH_CLIENT_IDS, then restart the backend.")
+                : err.status === 403 ? "Google sign-in was refused. Check that your Google account is verified and allowed by the OAuth consent screen."
+                    : err.status === 503 ? "Google sign-in is not configured on the backend. Set GOOGLE_OAUTH_CLIENT_IDS and restart it."
+                        : err.status === 400 ? "Google did not return a valid sign-in token. Try again or check the browser console."
+                            : "Could not reach the server. Is the backend running?";
+        }
         return err.status === 401 ? "Wrong username or password."
             : err.status === 409 ? "That username or email is already taken."
                 : err.status === 400 ? "Check the fields: username 3+ characters, valid email, password 6+."
@@ -45,7 +48,7 @@
     }
 
     function goToGame() {
-        location.replace("index.html");
+        location.replace("/explore");
     }
 
     $("switch").addEventListener("click", (e) => {
@@ -81,19 +84,29 @@
             await API.googleLogin(response.credential);
             goToGame();
         } catch (err) {
-            say(errorText(err));
+            say(errorText(err, true));
         }
     }
 
     function initGoogle() {
-        if (!GOOGLE_CLIENT_ID) return;
+        fetch("/api/config/auth", {cache: "no-store"})
+            .then(response => response.ok ? response.json() : Promise.reject(new Error("Auth config unavailable")))
+            .then(config => loadGoogle(config.googleClientId))
+            .catch(() => say("Google sign-in is not configured on the backend.", true));
+    }
+
+    function loadGoogle(clientId) {
+        if (!clientId) {
+            say("Google sign-in is not configured on the backend.", true);
+            return;
+        }
         const s = document.createElement("script");
         s.src = "https://accounts.google.com/gsi/client";
         s.async = true;
         s.onload = () => {
             if (!window.google) return;
             window.google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
+                client_id: clientId,
                 callback: onGoogleCredential
             });
             window.google.accounts.id.renderButton($("google-slot"), {
@@ -107,7 +120,9 @@
         document.head.append(s);
     }
 
-    if (new URLSearchParams(location.search).has("expired")) {
+    const params = new URLSearchParams(location.search);
+    setMode(params.get("mode") === "signup");
+    if (params.has("expired")) {
         say("Your session expired. Please log in again.", true);
     }
     initGoogle();

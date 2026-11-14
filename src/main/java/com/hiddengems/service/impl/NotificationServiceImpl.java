@@ -52,6 +52,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    public void notifyFriendsBump(User actor, Gem gem) {
+        List<Long> friendIds = friendshipRepository.findFriendIds(actor.getId(), FriendshipStatus.ACCEPTED);
+        if (friendIds.isEmpty()) {
+            return;
+        }
+        String message = "%s discovered %s. Bump! Check it out on the map."
+                .formatted(actor.getUsername(), gem.getName());
+        List<Notification> notifications = friendIds.stream()
+                .map(id -> build(userRepository.getReferenceById(id), actor, NotificationType.BUMP, gem, message))
+                .toList();
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    @Transactional
     public void notifyFriendRequest(User from, User to) {
         notificationRepository.save(build(to, from, NotificationType.FRIEND_REQUEST, null,
                 "%s sent you a friend request".formatted(from.getUsername())));

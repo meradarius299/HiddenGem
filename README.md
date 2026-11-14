@@ -1,4 +1,4 @@
-# Hidden Gems
+﻿# Hidden Gems
 
 Discover nearby places and collect their stories.
 

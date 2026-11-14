@@ -9,6 +9,8 @@ public interface GemService {
 
     List<GemResponse> findAll();
 
+    List<GemResponse> findHidden();
+
     GemResponse findById(Long id);
 
     List<GemResponse> findNearby(double lat, double lng, double radiusKm);
@@ -17,5 +19,5 @@ public interface GemService {
 
     void delete(Long id);
 
-    GemResponse setVerified(Long id, boolean verified);
+    GemResponse setVisible(Long id, boolean visible);
 }

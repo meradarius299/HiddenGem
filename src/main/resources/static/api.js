@@ -1,7 +1,7 @@
 "use strict";
 
 const API = (() => {
-    const TOKEN = "hg.token", USER = "hg.user";
+    const TOKEN = "hg.token", USER = "hg.user", ROLES = "hg.roles";
     const store = {
         get: (k) => {
             try {
@@ -31,8 +31,14 @@ const API = (() => {
         if (token) headers.Authorization = `Bearer ${token}`;
         const res = await fetch(path, {method, headers, body: body ? JSON.stringify(body) : undefined});
         if (!res.ok) {
+            let detail = "";
+            try {
+                const payload = await res.json();
+                detail = payload.detail || payload.message || "";
+            } catch { /* response may have no JSON body */ }
             const err = new Error(`HTTP ${res.status}`);
             err.status = res.status;
+            err.detail = detail;
             throw err;
         }
         return res.status === 204 ? null : res.json();
@@ -41,6 +47,7 @@ const API = (() => {
     const save = (r) => {
         store.set(TOKEN, r.token);
         store.set(USER, r.username);
+        store.set(ROLES, JSON.stringify(r.roles || []));
         return r;
     };
 
@@ -48,9 +55,11 @@ const API = (() => {
         request,
         isLoggedIn: () => !!store.get(TOKEN),
         username: () => store.get(USER) || "",
+        isAdmin: () => { try { return JSON.parse(store.get(ROLES) || "[]").includes("ROLE_ADMIN"); } catch { return false; } },
         logout: () => {
             store.del(TOKEN);
             store.del(USER);
+            store.del(ROLES);
         },
         login: async (username, password) =>
             save(await request("/api/auth/login", {method: "POST", body: {username, password}})),
@@ -62,6 +71,9 @@ const API = (() => {
             save(await request("/api/auth/google", {method: "POST", body: {idToken}})),
         getGems: () => request("/api/gems"),
         createGem: (gem) => request("/api/gems", {method: "POST", body: gem}),
+        deleteGem: (id) => request(`/api/gems/${id}`, {method: "DELETE"}),
+        setGemVisibility: (id, visible) => request(`/api/gems/${id}/visibility?visible=${visible}`, {method: "PATCH"}),
+        getHiddenGems: () => request("/api/gems/hidden"),
         collectGem: (id, lat, lng) =>
             request(`/api/gems/${id}/collect`, {method: "POST", body: {latitude: lat, longitude: lng}}),
         getCollected: () => request("/api/me/collected"),

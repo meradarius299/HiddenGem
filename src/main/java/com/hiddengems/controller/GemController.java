@@ -33,6 +33,12 @@ public class GemController {
         return gemService.findAll();
     }
 
+    @GetMapping("/hidden")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<GemResponse> getHidden() {
+        return gemService.findHidden();
+    }
+
     @GetMapping("/{id}")
     public GemResponse getOne(@PathVariable Long id) {
         return gemService.findById(id);
@@ -58,9 +64,9 @@ public class GemController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/verify")
+    @PatchMapping("/{id}/visibility")
     @PreAuthorize("hasRole('ADMIN')")
-    public GemResponse verify(@PathVariable Long id, @RequestParam(defaultValue = "true") boolean verified) {
-        return gemService.setVerified(id, verified);
+    public GemResponse setVisibility(@PathVariable Long id, @RequestParam boolean visible) {
+        return gemService.setVisible(id, visible);
     }
 }

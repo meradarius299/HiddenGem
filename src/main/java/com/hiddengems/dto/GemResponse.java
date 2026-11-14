@@ -11,7 +11,7 @@ public record GemResponse(
         double latitude,
         double longitude,
         String category,
-        boolean verified,
+        boolean visible,
         String owner,
         LocalDateTime createdAt) {
 
@@ -23,7 +23,7 @@ public record GemResponse(
                 gem.getLatitude(),
                 gem.getLongitude(),
                 gem.getCategory(),
-                gem.isVerified(),
+                gem.isVisible(),
                 gem.getOwner().getUsername(),
                 gem.getCreatedAt());
     }

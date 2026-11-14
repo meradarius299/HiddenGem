@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 window.HiddenGemGlobe = (() => {
     const status = (message) => {
@@ -57,18 +57,28 @@ window.HiddenGemGlobe = (() => {
         const player = L.circleMarker([0, 0], {
             radius: 8, color: "#fff", weight: 3, fillColor: "#1e5fa8", fillOpacity: 1
         });
-        const icon = done => L.divIcon({
-            className: "", html: '<div class="pin ' + (done ? "done" : "") + '">' + (done ? "✦" : "?") + '</div>',
+        let routeLayer = null;
+        const icon = (done, friend) => L.divIcon({
+            className: "", html: '<div class="pin ' + (done ? "done" : friend ? "friend" : "") + '">' + (done ? "✦" : friend ? "F" : "?") + '</div>',
             iconSize: [34, 34], iconAnchor: [17, 17]
         });
         return {
             addGem(g, onClick) {
-                const marker = L.marker([g.lat, g.lon], { icon: icon(false) }).addTo(map);
+                const marker = L.marker([g.lat, g.lon], { icon: icon(false, false), title: `Added by ${g.owner || "a town explorer"}` }).addTo(map);
                 marker.on("click", onClick);
-                return { setCollected: done => marker.setIcon(icon(done)) };
+                return { setCollected: (done, friend) => marker.setIcon(icon(done, friend)) };
             },
             flyTo: (position, zoom) => map.flyTo(position, zoom),
             setPlayer: (lat, lng) => player.setLatLng([lat, lng]).addTo(map),
+            setRoute(coordinates) {
+                if (routeLayer) map.removeLayer(routeLayer);
+                routeLayer = L.polyline(coordinates.map(([lng, lat]) => [lat, lng]), {
+                    color: "#b3261e", weight: 6, opacity: .92, lineCap: "round", lineJoin: "round"
+                }).addTo(map);
+                map.fitBounds(routeLayer.getBounds(), {padding: [60, 60], maxZoom: 16});
+            },
+            clearRoute() { if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; } },
+            dismissPopup: () => map.closePopup(),
             showPopup: (g, content) => L.popup().setLatLng([g.lat, g.lon]).setContent(content).openOn(map),
             getContainer: () => map.getContainer(),
             onClick: fn => map.on("click", fn)
@@ -76,13 +86,13 @@ window.HiddenGemGlobe = (() => {
     }
 
     async function googleGlobe(gems, key) {
-        const [{ Map3DElement, Marker3DInteractiveElement, Marker3DElement }, { PinElement }] = await loadGoogle(key);
+        const [{ Map3DElement, Marker3DInteractiveElement, Marker3DElement, Polyline3DElement }, { PinElement }] = await loadGoogle(key);
         const host = document.getElementById("map");
         const first = gems[0] || { lat: 45, lon: 25 };
         const center = { lat: first.lat, lng: first.lon };
         const globe = new Map3DElement({
-            center, range: 20000000, tilt: 0, heading: 0,
-            mode: "HYBRID", gestureHandling: "GREEDY"
+            center, range: 4000, tilt: 60, heading: 0,
+            mode: "ROADMAP", gestureHandling: "GREEDY"
         });
         globe.style.width = "100%";
         globe.style.height = "100%";
@@ -116,26 +126,27 @@ window.HiddenGemGlobe = (() => {
                 durationMillis: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1800
             });
         };
-        const explore = (lat, lng) => fly({ center: { lat, lng, altitude: 0 }, altitudeMode: "RELATIVE_TO_GROUND", range: 4000, tilt: 60, heading: 0 });
-        document.getElementById("view-globe").onclick = () =>
-            fly({ center: globe.center, range: 20000000, tilt: 0, heading: 0 });
-        document.getElementById("view-gems").onclick = () => explore(first.lat, first.lon);
-        document.getElementById("map-views").hidden = false;
+        const explore = (lat, lng) => fly({
+            center: {lat, lng, altitude: 0}, altitudeMode: "RELATIVE_TO_GROUND",
+            range: 4000, tilt: 60, heading: 0
+        });
         let player;
+        let routeLine;
         return {
             addGem(g, onClick) {
                 const marker = new Marker3DInteractiveElement({
                     position: { lat: g.lat, lng: g.lon },
-                    altitudeMode: "CLAMP_TO_GROUND", drawsWhenOccluded: true, title: g.hint
+                    altitudeMode: "CLAMP_TO_GROUND", drawsWhenOccluded: true,
+                    title: `Added by ${g.owner || "a town explorer"}`
                 });
                 const pin = new PinElement({ background: "#a9741a", borderColor: "#fff", glyphColor: "#fff", glyphText: "?", scale: 1.2 });
                 marker.append(pin);
                 marker.addEventListener("gmp-click", event => { event.stopPropagation(); onClick(); });
                 globe.append(marker);
-                return { setCollected(done) {
-                    pin.background = done ? "#2e6b57" : "#a9741a";
-                    pin.glyphText = done ? "✦" : "?";
-                    marker.title = done ? g.name : g.hint;
+                return { setCollected(done, friend) {
+                    pin.background = done ? "#2e6b57" : friend ? "#1e5fa8" : "#a9741a";
+                    pin.glyphText = done ? "✦" : friend ? "F" : "?";
+                    marker.title = `${g.name} · added by ${g.owner || "a town explorer"}`;
                 }};
             },
             flyTo: ([lat, lng]) => explore(lat, lng),
@@ -147,6 +158,28 @@ window.HiddenGemGlobe = (() => {
                 }
                 player.position = { lat, lng };
             },
+            setRoute(coordinates) {
+                if (routeLine) routeLine.remove();
+                const stride = Math.max(1, Math.ceil(coordinates.length / 1200));
+                const path = coordinates.filter((_, index) => index % stride === 0 || index === coordinates.length - 1)
+                    .map(([lng, lat]) => ({lat, lng, altitude: 12}));
+                routeLine = new Polyline3DElement({
+                    path,
+                    strokeColor: "#00e5ff", outerColor: "#102a43", strokeWidth: 14,
+                    outerWidth: .7, altitudeMode: "RELATIVE_TO_GROUND", drawsOccludedSegments: true
+                });
+                globe.append(routeLine);
+                const bounds = coordinates.reduce((box, point) => ({
+                    south: Math.min(box.south, point[1]), north: Math.max(box.north, point[1]),
+                    west: Math.min(box.west, point[0]), east: Math.max(box.east, point[0])
+                }), {south: 90, north: -90, west: 180, east: -180});
+                const {south, north, west, east} = bounds;
+                const center = {lat: (south + north) / 2, lng: (west + east) / 2};
+                const span = Math.max((east - west) * 80000, (north - south) * 111000);
+                fly({center, range: Math.min(150000, Math.max(1800, span * 2.2)), tilt: 48, heading: 0});
+            },
+            clearRoute() { if (routeLine) { routeLine.remove(); routeLine = null; } },
+            dismissPopup: () => { detail.hidden = true; },
             showPopup(g, content) {
                 const close = document.createElement("button");
                 close.type = "button";
@@ -169,7 +202,6 @@ window.HiddenGemGlobe = (() => {
     }
 
     async function create(gems) {
-        status("Loading globe…");
         let config;
         try {
             const controller = new AbortController();
@@ -188,7 +220,6 @@ window.HiddenGemGlobe = (() => {
         } catch {
             // The existing map remains usable when Google cannot initialize.
         }
-        document.getElementById("map-views").hidden = true;
         const fallback = leaflet(gems);
         // Keep this separate from the basemap's tile status.
         const note = document.createElement("p");

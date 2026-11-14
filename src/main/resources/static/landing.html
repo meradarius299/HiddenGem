@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f2e9">
+    <meta name="description" content="Find the places locals love. Explore hidden gems, collect stories, and share your favorite spots with friends.">
+    <title>Hidden Gems — Find your kind of place</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;600;700&family=Alegreya+Sans:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/" aria-label="Hidden Gems home"><span class="brand-mark">✦</span> Hidden Gems</a>
+    <nav aria-label="Main navigation">
+        <a class="nav-link" href="#how-it-works">How it works</a>
+        <a class="nav-link" href="#community">Community</a>
+        <a class="nav-link" href="#contact">Contact</a>
+        <a class="nav-login" href="/login">Log in</a>
+        <a class="nav-cta" href="/login?mode=signup">Join the adventure <span aria-hidden="true">↗</span></a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow"><span></span> A little more wonder, wherever you are</p>
+            <h1>Find your kind<br>of <em>hidden.</em></h1>
+            <p class="hero-text">The tiny café around the corner. The quiet view above town. The places you’d never find in a guidebook — until now.</p>
+            <div class="hero-actions">
+                <a class="button primary" href="/login">Start exploring <span aria-hidden="true">→</span></a>
+                <a class="text-link" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a>
+            </div>
+            <div class="social-proof"><div class="avatar-stack" aria-hidden="true"><span>☺</span><span>✿</span><span>✦</span></div><p><strong>Made for curious people.</strong><br>Shared by your local community.</p></div>
+        </div>
+
+        <div class="hero-art" role="img" aria-label="Illustrated map with a pin marking a local hidden gem">
+            <div class="sun"></div>
+            <div class="map-card">
+                <div class="map-grid"></div>
+                <svg class="roads" viewBox="0 0 620 490" aria-hidden="true">
+                    <path d="M-30 110 C90 130 100 40 215 67 S370 150 650 85"/>
+                    <path d="M-20 290 C90 250 110 210 220 235 S420 340 650 270"/>
+                    <path d="M80 -30 C95 95 175 145 150 250 S90 370 145 530"/>
+                    <path d="M355 -20 C320 95 400 130 370 240 S300 390 350 520"/>
+                    <path d="M530 -10 C470 105 525 180 490 270 S470 405 540 510"/>
+                    <path class="river" d="M-30 395 C130 355 200 425 310 370 S460 310 650 370"/>
+                </svg>
+                <span class="map-label label-one">OLD TOWN</span>
+                <span class="map-label label-two">RIVER WALK</span>
+                <span class="map-label label-three">THE LITTLE GARDEN</span>
+                <span class="tree tree-one">✿</span><span class="tree tree-two">✿</span><span class="tree tree-three">✿</span>
+                <span class="pin-shadow"></span>
+                <span class="hero-pin"><span>✦</span></span>
+                <div class="place-card"><span class="place-icon">☕</span><span><strong>The Little Corner</strong><small>A favorite, tucked away</small></span><span class="place-star">✦</span></div>
+            </div>
+            <div class="art-note"><span>✧</span> Take the scenic route.</div>
+        </div>
+        <span class="hero-spark spark-one" aria-hidden="true">✳</span>
+        <span class="hero-spark spark-two" aria-hidden="true">✧</span>
+    </section>
+
+    <section class="how" id="how-it-works">
+        <div class="section-heading"><p class="eyebrow">Your next favorite place is closer than you think</p><h2>Good things are better <em>found.</em></h2></div>
+        <div class="steps">
+            <article class="step-card"><span class="step-number">01</span><span class="step-icon">⌖</span><h3>Explore nearby</h3><p>See places worth discovering, shared by people who know your town best.</p></article>
+            <article class="step-card"><span class="step-number">02</span><span class="step-icon">✦</span><h3>Follow a clue</h3><p>Get out there, find the spot, and unlock the story behind it.</p></article>
+            <article class="step-card"><span class="step-number">03</span><span class="step-icon">♡</span><h3>Pass it on</h3><p>Share your own little gems and make someone else’s day out.</p></article>
+        </div>
+    </section>
+
+    <section class="community" id="community">
+        <div class="community-mark">✦</div>
+        <div><p class="eyebrow">A town feels smaller when you share it</p><h2>Made for the places<br>that make a place.</h2></div>
+        <p class="community-text">Follow friends’ discoveries, collect the spots you love, and build a map that feels like yours. Every pin has a person and a story behind it.</p>
+        <a class="button light" href="/login?mode=signup">Find your first gem <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="contact-copy">
+            <p class="eyebrow">We’re always happy to hear from you</p>
+            <h2>Have a question<br>or a gem to share?</h2>
+            <p>Send us a note, suggest a feature, or tell us about a little place you think everyone should know.</p>
+        </div>
+        <div class="contact-card">
+            <span class="contact-icon">✉</span>
+            <div><strong>Get in touch</strong><p id="contact-detail">Contact details coming soon.</p></div>
+        </div>
+    </section>
+</main>
+
+<footer><a class="brand" href="/"><span class="brand-mark">✦</span> Hidden Gems</a><span>Go a little further. Find a little more.</span><a href="/login?mode=signup">Join the community ↗</a></footer>
+</body>
+</html>

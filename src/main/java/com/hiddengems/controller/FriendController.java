@@ -1,6 +1,7 @@
 package com.hiddengems.controller;
 
 import com.hiddengems.dto.FriendRequestCreate;
+import com.hiddengems.dto.FriendProfileResponse;
 import com.hiddengems.dto.FriendshipResponse;
 import com.hiddengems.dto.UserSummaryResponse;
 import com.hiddengems.service.FriendService;
@@ -36,6 +37,28 @@ public class FriendController {
     @GetMapping("/friends")
     public List<UserSummaryResponse> friends(Authentication auth) {
         return friendService.friends(auth.getName());
+    }
+
+    @GetMapping("/friends/{userId}/profile")
+    public FriendProfileResponse profile(@PathVariable Long userId, Authentication auth) {
+        return friendService.profile(auth.getName(), userId);
+    }
+
+    @GetMapping("/friends/blocked")
+    public List<UserSummaryResponse> blocked(Authentication auth) {
+        return friendService.blockedUsers(auth.getName());
+    }
+
+    @PostMapping("/friends/{userId}/block")
+    public ResponseEntity<Void> block(@PathVariable Long userId, Authentication auth) {
+        friendService.block(auth.getName(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/friends/{userId}/block")
+    public ResponseEntity<Void> unblock(@PathVariable Long userId, Authentication auth) {
+        friendService.unblock(auth.getName(), userId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/friends/requests")

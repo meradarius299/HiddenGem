@@ -4,5 +4,6 @@ package com.hiddengems.entity;
 public enum FriendshipStatus {
     PENDING,
     ACCEPTED,
-    REJECTED
+    REJECTED,
+    BLOCKED
 }

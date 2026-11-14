@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.hiddengems.entity.Badge;
 import com.hiddengems.service.BadgeService;
+import com.hiddengems.service.NotificationService;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class CollectionServiceImpl implements CollectionService {
     private final GemRepository gemRepository;
     private final UserRepository userRepository;
     private final BadgeService badgeService;
+    private final NotificationService notificationService;
 
     @Override
     public List<Long> collectedGemIds(String username) {
@@ -51,15 +53,20 @@ public class CollectionServiceImpl implements CollectionService {
         }
 
         boolean already = collectedGemRepository.existsByUserIdAndGemId(user.getId(), gemId);
+        boolean newlyCollected = false;
         if (!already) {
             CollectedGem collected = new CollectedGem();
             collected.setUser(user);
             collected.setGem(gem);
             try {
                 collectedGemRepository.save(collected);
+                newlyCollected = true;
             } catch (DataIntegrityViolationException e) {
                 already = true; // a parallel request saved it first
             }
+        }
+        if (newlyCollected) {
+            notificationService.notifyFriendsBump(user, gem);
         }
         long total = collectedGemRepository.countByUserId(user.getId());
         List<String> newBadges = already

@@ -17,6 +17,12 @@ public interface GemRepository extends JpaRepository<Gem, Long> {
     List<Gem> findAllByOrderByCreatedAtDesc();
 
     @EntityGraph(attributePaths = "owner")
+    List<Gem> findAllByVisibleTrueOrderByCreatedAtDesc();
+
+    @EntityGraph(attributePaths = "owner")
+    List<Gem> findAllByVisibleFalseOrderByCreatedAtDesc();
+
+    @EntityGraph(attributePaths = "owner")
     Optional<Gem> findWithOwnerById(Long id);
 
     /** Locurile adaugate de utilizatorii din lista (folosit pentru feed-ul prietenilor). */
@@ -26,7 +32,7 @@ public interface GemRepository extends JpaRepository<Gem, Long> {
     /** Locuri aflate la cel mult radiusKm de punctul (lat, lng) - formula Haversine. */
     @Query(value = """
             SELECT g.* FROM gems g
-            WHERE 6371 * acos(LEAST(1,
+            WHERE g.visible = true AND 6371 * acos(LEAST(1,
                     cos(radians(:lat)) * cos(radians(g.latitude))
                   * cos(radians(g.longitude) - radians(:lng))
                   + sin(radians(:lat)) * sin(radians(g.latitude)))) <= :radiusKm

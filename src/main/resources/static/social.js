@@ -19,7 +19,7 @@
         #social-badge { background: #b3261e; color: #fff; border-radius: 999px; font-size: .75rem;
             padding: 0 .45rem; margin-left: .45rem; }
         #social-badge[hidden] { display: none; }
-        #social { width: min(40rem, calc(100% - 2rem)); }
+        #social { width: min(54rem, calc(100% - 2rem)); max-height: 90dvh; overflow-y: auto; }
         .soc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
         .soc-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .soc-tabs button { background: transparent; color: var(--ink); }
@@ -43,6 +43,32 @@
         .soc-muted { color: var(--muted); margin: .5rem 0; }
         .soc-status { min-height: 1.4rem; margin: .8rem 0 0; }
         .soc-error { color: #9b2c2c; }
+        .soc-profile { display: grid; gap: 1rem; }
+        .soc-profile-top { display: flex; align-items: center; gap: .9rem; }
+        .soc-avatar { width: 4rem; height: 4rem; flex: 0 0 auto; display: grid; place-items: center;
+            border-radius: 50%; background: var(--ink); color: var(--panel); font: 700 1.7rem "Alegreya", Georgia, serif; }
+        .soc-profile-top h3 { margin: 0 0 .15rem !important; font-size: 1.5rem !important; }
+        .soc-profile-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .soc-profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
+        .soc-stat { padding: .8rem; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+        .soc-stat strong, .soc-stat span { display: block; }
+        .soc-stat strong { font: 700 1.3rem "Alegreya", Georgia, serif; }
+        .soc-stat span { color: var(--muted); font-size: .82rem; }
+        .soc-profile-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(14rem, .85fr); gap: 1rem; }
+        .soc-profile-section { min-width: 0; padding: .8rem; border: 1px solid var(--line); border-radius: 12px; }
+        .soc-profile-section h3 { margin: 0 0 .5rem !important; }
+        .soc-profile-scroll { max-height: 14rem; overflow-y: auto; }
+        .soc-medals { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .5rem; }
+        .soc-medal { padding: .6rem; border-radius: 10px; background: #eef3f1; }
+        .soc-medal.earned { background: #fbf3e0; border: 1px solid var(--brass); }
+        .soc-medal strong, .soc-medal span { display: block; }
+        .soc-medal span { font-size: .82rem; color: var(--muted); }
+        .soc-profile-link { background: transparent !important; color: var(--ink) !important; border: 0 !important; padding: .35rem 0 !important; text-align: left; }
+        @media (max-width: 620px) {
+            #social { width: calc(100% - 1rem); padding: 1rem; }
+            .soc-profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .soc-profile-columns { grid-template-columns: minmax(0, 1fr); }
+        }
     `;
     document.head.append(css);
 
@@ -93,6 +119,7 @@
     const tabButtons = {};
     let tab = "notifications";
     let lastCount = -1;
+    let pageRequest = 0;
 
     function say(text, isError) {
         status.textContent = text || "";
@@ -133,7 +160,7 @@
             }
             await refreshBadge(false);
         }
-        if (n.type === "NEW_GEM" && n.gemId) goToGem(n.gemId);
+        if ((n.type === "NEW_GEM" || n.type === "BUMP") && n.gemId) goToGem(n.gemId);
         else if (n.type === "FRIEND_REQUEST") show("friends");
         else show("notifications");
     }
@@ -175,7 +202,7 @@
         if (!gems.length) {
             return [h("p", {
                 class: "soc-muted",
-                text: "Nothing here yet. When a friend adds a gem, it shows up here."
+                text: "Nothing here yet. Gems your friends add or discover will show up here."
             })];
         }
         return [h("ul", {class: "soc-list"}, gems.map((g) =>
@@ -185,7 +212,8 @@
                         h("strong", {text: g.name}),
                         h("span", {
                             class: "soc-time",
-                            text: g.owner + " · " + (g.category || "gem") + " · " + ago(g.createdAt)
+                            text: g.actor + (g.activity === "DISCOVERED" ? " discovered · " : " added · ")
+                                + (g.category || "gem") + " · " + ago(g.createdAt)
                         })),
                     h("button", {type: "button", class: "plain", onclick: () => goToGem(g.id)}, "Show on map")))))];
     }
@@ -212,10 +240,88 @@
         show("friends");
     }
 
+    async function blockFriend(user) {
+        if (!confirm(`Block ${user.username}? This removes them from your friends and prevents new friend requests.`)) return;
+        try {
+            await API.request(`/api/friends/${user.id}/block`, {method: "POST"});
+        } catch (err) {
+            say(errText(err), true);
+            return;
+        }
+        say(`${user.username} was blocked.`);
+        show("friends");
+    }
+
+    function profileStats(profile) {
+        return h("div", {class: "soc-profile-stats"}, [
+            ["Score", `${profile.score} pts`],
+            ["Stars", `${profile.stars} ★`],
+            ["Gems collected", profile.collectedGems],
+            ["Friends", profile.friendsCount]
+        ].map(([label, value]) => h("div", {class: "soc-stat"},
+            h("strong", {text: String(value)}), h("span", {text: label}))));
+    }
+
+    function renderProfile(profile) {
+        const medals = profile.medals || [];
+        const gems = profile.gems || [];
+        const friends = profile.friends || [];
+        const joined = profile.joinedAt ? new Date(profile.joinedAt).toLocaleDateString() : "";
+        const medalGrid = medals.length
+            ? h("div", {class: "soc-medals"}, medals.map(m => h("div", {
+                class: "soc-medal" + (m.earned ? " earned" : "")
+            },
+                h("strong", {text: `${m.earned ? "🏅" : "🔒"} ${m.title}`}),
+                h("span", {text: m.description}),
+                h("span", {text: m.earned ? `Earned ${new Date(m.earnedAt).toLocaleDateString()}` : `${m.keysRequired} gems needed`}))))
+            : h("p", {class: "soc-muted", text: "No medals yet."});
+        const gemList = gems.length
+            ? h("ul", {class: "soc-list soc-profile-scroll"}, gems.map(g => h("li", {},
+                h("div", {class: "soc-row"}, h("strong", {text: g.name}),
+                    h("span", {class: "soc-time", text: new Date(g.collectedAt).toLocaleDateString()})))))
+            : h("p", {class: "soc-muted", text: "No gems collected yet."});
+        const friendList = friends.length
+            ? h("ul", {class: "soc-list soc-profile-scroll"}, friends.map(f => h("li", {},
+                h("div", {class: "soc-row"}, h("span", {text: f.username})))))
+            : h("p", {class: "soc-muted", text: "No friends yet."});
+
+        return h("div", {class: "soc-profile"},
+            h("button", {type: "button", class: "plain", onclick: () => show("friends")}, "← Back to friends"),
+            h("div", {class: "soc-profile-top"},
+                h("div", {class: "soc-avatar", text: profile.username.slice(0, 1).toUpperCase()}),
+                h("div", {}, h("h3", {text: profile.username}), h("span", {class: "soc-time", text: joined ? `Member since ${joined}` : "Hidden Gems explorer"}))),
+            profileStats(profile),
+            h("p", {class: "soc-muted", text: "Score: 100 points per collected gem + 250 points per earned medal. Each gem adds one star."}),
+            h("div", {class: "soc-profile-actions"},
+                h("button", {type: "button", class: "plain", onclick: () => removeFriend(profile)}, "Unfriend"),
+                h("button", {type: "button", class: "plain", onclick: () => blockFriend(profile)}, "Block")),
+            h("div", {class: "soc-profile-section"}, h("h3", {text: `Medals (${medals.filter(m => m.earned).length})`}), medalGrid),
+            h("div", {class: "soc-profile-columns"},
+                h("section", {class: "soc-profile-section"}, h("h3", {text: `Collected gems (${gems.length})`}), gemList),
+                h("section", {class: "soc-profile-section"}, h("h3", {text: `Friends (${friends.length})`}), friendList)));
+    }
+
+    async function showProfile(userId) {
+        const requestId = ++pageRequest;
+        tab = "friends";
+        Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === "friends")));
+        say("");
+        body.replaceChildren(h("p", {class: "soc-muted", text: "Loading profile…"}));
+        try {
+            const profile = await API.request(`/api/friends/${userId}/profile`);
+            if (pageRequest === requestId) body.replaceChildren(renderProfile(profile));
+        } catch (err) {
+            if (pageRequest === requestId) body.replaceChildren(
+                h("button", {type: "button", class: "plain", onclick: () => show("friends")}, "← Back to friends"),
+                h("p", {class: "soc-error", text: errText(err)}));
+        }
+    }
+
     async function buildFriends() {
-        const [friends, incoming] = await Promise.all([
+        const [friends, incoming, blocked] = await Promise.all([
             API.request("/api/friends"),
-            API.request("/api/friends/requests/incoming")
+            API.request("/api/friends/requests/incoming"),
+            API.request("/api/friends/blocked")
         ]);
 
         const userRow = (u) => {
@@ -291,15 +397,29 @@
             nodes.push(h("ul", {class: "soc-list"}, friends.map((u) =>
                 h("li", {},
                     h("div", {class: "soc-row"},
-                        h("span", {text: u.username}),
-                        h("button", {type: "button", class: "plain", onclick: () => removeFriend(u)}, "Remove"))))));
+                        h("button", {type: "button", class: "soc-profile-link", onclick: () => showProfile(u.id)}, u.username),
+                        h("button", {type: "button", class: "plain", onclick: () => removeFriend(u)}, "Unfriend"))))));
         } else {
             nodes.push(h("p", {class: "soc-muted", text: "No friends yet. Search for a username above."}));
+        }
+        if (blocked.length) {
+            nodes.push(h("h3", {text: `Blocked (${blocked.length})`}));
+            nodes.push(h("ul", {class: "soc-list"}, blocked.map(user =>
+                h("li", {}, h("div", {class: "soc-row"},
+                    h("span", {text: user.username}),
+                    h("button", {type: "button", class: "plain", onclick: async () => {
+                        try {
+                            await API.request(`/api/friends/${user.id}/block`, {method: "DELETE"});
+                            say(`${user.username} was unblocked.`);
+                            show("friends");
+                        } catch (err) { say(errText(err), true); }
+                    }}, "Unblock"))))));
         }
         return nodes;
     }
 
     async function show(name) {
+        const requestId = ++pageRequest;
         tab = name;
         Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === name)));
         say("");
@@ -308,9 +428,9 @@
             const nodes = await (name === "notifications" ? buildNotifications()
                 : name === "feed" ? buildFeed()
                     : buildFriends());
-            if (tab === name) body.replaceChildren(...nodes);
+            if (requestId === pageRequest && tab === name) body.replaceChildren(...nodes);
         } catch (err) {
-            if (tab === name) body.replaceChildren(h("p", {class: "soc-error", text: errText(err)}));
+            if (requestId === pageRequest && tab === name) body.replaceChildren(h("p", {class: "soc-error", text: errText(err)}));
         }
     }
 

@@ -12,6 +12,8 @@ public interface NotificationService {
     /** Creeaza o notificare "Uite ce a descoperit ..." pentru fiecare prieten al lui actor. */
     void notifyFriendsNewGem(User actor, Gem gem);
 
+    void notifyFriendsBump(User actor, Gem gem);
+
     void notifyFriendRequest(User from, User to);
 
     void notifyBadgeEarned(User user, Badge badge);
