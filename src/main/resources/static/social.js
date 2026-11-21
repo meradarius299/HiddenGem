@@ -64,6 +64,14 @@
         .soc-medal strong, .soc-medal span { display: block; }
         .soc-medal span { font-size: .82rem; color: var(--muted); }
         .soc-profile-link { background: transparent !important; color: var(--ink) !important; border: 0 !important; padding: .35rem 0 !important; text-align: left; }
+                .soc-chat-list { height: 45dvh; overflow-y: auto; display: flex; flex-direction: column; gap: .4rem;
+            padding: .6rem; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+        .soc-chat-msg { max-width: 80%; padding: .45rem .7rem; border-radius: 12px; background: #eef3f1;
+            align-self: flex-start; display: grid; gap: .1rem; }
+        .soc-chat-msg.mine { align-self: flex-end; background: #fbf3e0; }
+        .soc-chat-text { overflow-wrap: anywhere; }
+        .soc-chat-form { display: flex; gap: .5rem; margin-top: .6rem; }
+        .soc-chat-form input { flex: 1; font: inherit; padding: .5rem; }
         @media (max-width: 620px) {
             #social { width: calc(100% - 1rem); padding: 1rem; }
             .soc-profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -131,7 +139,12 @@
     async function refreshBadge(rerender) {
         try {
             const r = await API.request("/api/notifications/unread-count");
-            const count = r && r.count ? r.count : 0;
+            let count = r && r.count ? r.count : 0;
+            try {
+                const chat = await API.request("/api/chat/unread");
+                count += Object.values(chat).reduce((sum, n) => sum + n, 0);
+            } catch (err) {
+            }
             badge.textContent = String(count);
             badge.hidden = count === 0;
             const changed = lastCount !== -1 && count !== lastCount;
@@ -304,6 +317,7 @@
     }
 
     async function showProfile(userId) {
+        stopChat();
         const requestId = ++pageRequest;
         tab = "friends";
         Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === "friends")));
@@ -319,11 +333,100 @@
         }
     }
 
+    let chatTimer = null;
+
+    function stopChat() {
+        if (chatTimer) {
+            clearInterval(chatTimer);
+            chatTimer = null;
+        }
+    }
+
+    async function showChat(friend) {
+        stopChat();
+        const requestId = ++pageRequest;
+        tab = "friends";
+        Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === "friends")));
+        say("");
+
+        let lastId = 0;
+        const shown = new Set();
+        const empty = h("p", {class: "soc-muted", text: "No messages yet. Say hi!"});
+        const list = h("div", {class: "soc-chat-list", role: "log", "aria-live": "polite"}, empty);
+        const input = h("input", {
+            type: "text", maxlength: "1000", placeholder: "Write a message…",
+            autocomplete: "off", "aria-label": "Message"
+        });
+        const sendBtn = h("button", {type: "submit"}, "Send");
+
+        function addMessages(msgs, forceScroll) {
+            const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
+            msgs.forEach((m) => {
+                if (shown.has(m.id)) return;
+                shown.add(m.id);
+                lastId = Math.max(lastId, m.id);
+                empty.remove();
+                list.append(h("div", {class: "soc-chat-msg" + (m.mine ? " mine" : "")},
+                    h("span", {class: "soc-chat-text", text: m.content}),
+                    h("span", {class: "soc-time", text: ago(m.createdAt)})));
+            });
+            if (forceScroll || atBottom) list.scrollTop = list.scrollHeight;
+        }
+
+        async function poll(initial) {
+            try {
+                const msgs = await API.request(`/api/chat/${friend.id}?afterId=${lastId}`);
+                if (pageRequest === requestId) addMessages(msgs, initial);
+            } catch (err) {
+                if (pageRequest === requestId && initial) {
+                    say(errText(err, {403: "You can only chat with your friends."}), true);
+                }
+            }
+        }
+
+        const form = h("form", {
+            class: "soc-chat-form",
+            onsubmit: async (e) => {
+                e.preventDefault();
+                const content = input.value.trim();
+                if (!content) return;
+                sendBtn.disabled = true;
+                try {
+                    const m = await API.request("/api/chat/" + friend.id, {method: "POST", body: {content}});
+                    input.value = "";
+                    say("");
+                    addMessages([m], true);
+                } catch (err) {
+                    say(errText(err, {
+                        400: "Message must be 1 to 1000 characters.",
+                        403: "You can only chat with your friends."
+                    }), true);
+                } finally {
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
+            }
+        }, input, sendBtn);
+
+        body.replaceChildren(
+            h("button", {type: "button", class: "plain", onclick: () => show("friends", true)}, "← Back to friends"),
+            h("h3", {text: "Chat with " + friend.username}),
+            list, form);
+
+        await poll(true);
+        if (pageRequest !== requestId) return;
+        chatTimer = setInterval(() => {
+            if (!document.hidden) poll(false);
+        }, 3000);
+        input.focus();
+    }
+
     async function buildFriends() {
-        const [friends, incoming, blocked] = await Promise.all([
+        const [friends, incoming, blocked, unread] = await Promise.all([
             API.request("/api/friends"),
             API.request("/api/friends/requests/incoming"),
-            API.request("/api/friends/blocked")
+            API.request("/api/friends/blocked"),
+            API.request("/api/chat/unread").catch(() => ({}))
         ]);
 
         const userRow = (u) => {
@@ -400,7 +503,10 @@
                 h("li", {},
                     h("div", {class: "soc-row"},
                         h("button", {type: "button", class: "soc-profile-link", onclick: () => showProfile(u.id)}, u.username),
-                        h("button", {type: "button", class: "plain", onclick: () => removeFriend(u)}, "Unfriend"))))));
+                        h("span", {class: "soc-actions"},
+                            h("button", {type: "button", onclick: () => showChat(u)},
+                                unread[u.id] ? `Chat (${unread[u.id]})` : "Chat"),
+                            h("button", {type: "button", class: "plain", onclick: () => removeFriend(u)}, "Unfriend")))))));
         } else {
             nodes.push(h("p", {class: "soc-muted", text: "No friends yet. Search for a username above."}));
         }
@@ -421,6 +527,7 @@
     }
 
     async function show(name, forceRefresh = false) {
+        stopChat();
         const requestId = ++pageRequest;
         tab = name;
         Object.entries(tabButtons).forEach(([key, b]) => b.setAttribute("aria-pressed", String(key === name)));
@@ -472,6 +579,7 @@
             body,
             status);
         document.body.append(dlg);
+        dlg.addEventListener("close", stopChat);
 
         const btn = h("button", {
             type: "button", id: "social-btn",
